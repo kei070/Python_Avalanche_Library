@@ -6,5 +6,5 @@ This repository includes the Python package ava_functions in the subdirectory Av
 to install the package. This is necessary for the other scripts to be functioning.
 
 Some packages and their versions used: <br>
-scikit-learn 1.5.1 <br>
-imbalanced-learn 0.12.3 <br>
+`scikit-learn 1.5.1` <br>
+`imbalanced-learn 0.12.3` <br>
