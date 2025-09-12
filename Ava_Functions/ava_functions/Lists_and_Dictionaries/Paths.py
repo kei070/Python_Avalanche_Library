@@ -48,13 +48,7 @@ path_par3 = ""
 obs_path = ""
 
 # path to data required for running seNorge
-path_seNorge = ""
-
-# path to data required for running seNorge
 path_scripts = ""
-
-# path to Satskred
-satsk_path = ""
 
 # NORA3 path on MyPassport
 nora3_sub_path = ""
@@ -62,5 +56,5 @@ nora3_sub_path = ""
 # python scripts path
 py_path_par = ""
 
-# python scripts path paranet
+# python scripts path parent
 py_par_path = ""
