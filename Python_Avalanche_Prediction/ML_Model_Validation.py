@@ -29,7 +29,7 @@ from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
 #%% set parameters
 n_best = 0  # set to 0 to use all best features -- this is required to generate a new best features list
 feats = "all"
-a_p = "wind"
+a_p = "wind_slab"
 
 class_weight = {0:1, 1:1}
 cw_str = f"CW{'_'.join([str(k).replace('.', 'p') for k in class_weight.values()])}"

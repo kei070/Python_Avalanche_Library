@@ -25,12 +25,12 @@ from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set parameters
-n_best = 30  # set to 0 to use all best features -- this is required to generate a new best features list
-feats = "best"
+n_best = 0  # set to 0 to use all best features -- this is required to generate a new best features list
+feats = "all"
 a_p = "wind_slab"
 
-min_leaf = 15
-min_split = 15
+min_leaf = 30
+min_split = 30
 
 class_weight = {0:1, 1:1}
 cw_str = f"CW{'_'.join([str(k).replace('.', 'p') for k in class_weight.values()])}"
