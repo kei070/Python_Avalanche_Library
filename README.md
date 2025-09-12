@@ -8,11 +8,11 @@ Before installing the package, the paths of to the data and scripts must be set 
 
 To build the SNOWPACK model in a container the following instructions were used: https://research-software.uit.no/blog/2023-building-snowpack/
 
-The procedures to generate the predictive feature data are described in the pdf-document `Gen_Avalanche_Predictors.pdf`.
+The procedures to generate the predictive feature data are described in the pdf-document `Doc_Gen_Avalanche_Predictors.pdf`.
 
-The procedure to download and prepare the avalanche danger/problem data from the Norwegian avalanche bulletin is described in the pdf-document `Gen_Modified_AvaProb_Files.pdf`.
+The procedure to download and prepare the avalanche danger/problem data from the Norwegian avalanche bulletin is described in the pdf-document `Doc_Gen_Modified_AvaProb_Files.pdf`.
 
-The procedure to optimise and train the random forest models is presented in the pdf-document `Train_ML_Model.pdf`.
+The procedure to optimise and train the random forest models is presented in the pdf-document `Doc_Train_ML_Model.pdf`.
 
 Some packages and their versions used: <br>
 `scikit-learn 1.5.1` <br>
