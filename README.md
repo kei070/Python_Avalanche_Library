@@ -4,6 +4,7 @@ This repository contains the code used to preprocess the data and train the mach
 This repository includes the Python package `ava_functions` in the subdirectory `Ava_Functions`. In that subdirectory execute <br>
 `pip install .` <br>
 to install the package. This is necessary for the other scripts to be functioning.
+Before installing the package, the paths of to the data and scripts must be set in `Ava_Functions/ava_functions/Lists_and_Directories/Paths.py`. The introductory comment in this file gives some information about the general directory structure expected by the other scripts.
 
 Some packages and their versions used: <br>
 `scikit-learn 1.5.1` <br>
