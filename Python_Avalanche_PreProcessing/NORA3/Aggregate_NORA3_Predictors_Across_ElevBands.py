@@ -20,8 +20,8 @@ reg_code = 3009
 ndlev = 2
 exposure = None
 a_p = "all"
-agg_type = "percentile"
-perc = 75
+agg_type = "mean"
+perc = 0
 
 
 #%% generate a name prefix/suffix depending on the gridcell aggregation
