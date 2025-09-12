@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Train the statistical model including SNOWPACK output.
+Perform a leave-one-out validation of random forest model.
 """
 
 
@@ -23,7 +23,7 @@ from ava_functions.StatMod import stat_mod
 from ava_functions.ConfMat_Helper import conf_helper
 from ava_functions.Model_Fidelity_Metrics import mod_metrics, dist_metrics
 from ava_functions.Lists_and_Dictionaries.Features import se_norge_feats, nora3_clean
-from ava_functions.Lists_and_Dictionaries.Paths import path_par
+from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
 
 
 #%% set parameters
@@ -400,7 +400,7 @@ if len(splits) == 4:
     fig.suptitle(a_ps[a_p] + " problem")
     fig.subplots_adjust(wspace=0.1)
 
-    pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+    pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
     cw_str = "_".join([str(k).replace(".", "p") for k in class_weight.values()])
     feats_str = f"{n_best}_{feats}Feats" if feats == "best" else f"{feats}Feats"
     pl.savefig(pl_path + f"Scores_AllSeasons_{a_p}_{feats_str}_CW{cw_str}.pdf", bbox_inches="tight", dpi=200)
@@ -473,157 +473,6 @@ if len(splits) == 3:
     pl.close()
 # end if
 
-
-#%% lines plot -- 5 panels
-"""
-if len(splits) == 5:
-    width = 0.1
-    x1, x2 = np.array([-0.15, -0.05]), np.array([0.05, 0.15])
-
-    a_ps = {"wind_slab":"Wind slab", "pwl_slab":"PWL slab", "wet":"Wet", "y":"General"}
-
-    fig = pl.figure(figsize=(10, 3))
-
-    ax00 = fig.add_subplot(151)
-    ax01 = fig.add_subplot(152)
-    ax02 = fig.add_subplot(153)
-    ax03 = fig.add_subplot(154)
-    ax04 = fig.add_subplot(155)
-    axes = [ax00, ax01, ax02, ax03, ax04]
-
-    for j in np.arange(len(test_pers)):
-        i = 0
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][0][0] for min_samp in min_samps],
-                     color="black", marker="o")
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][0][1] for min_samp in min_samps],
-                     color="black", marker="x")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][1][0] for min_samp in min_samps],
-                     color="red", marker="o")
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][1][1] for min_samp in min_samps],
-                     color="red", marker="x")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["acc_test"] for min_samp in min_samps],
-                     color="blue", marker="s")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["metrics"]["FAR"] for min_samp in min_samps],
-                     color="gray", marker="d")
-        axes[j].set_title(" & ".join(test_pers[j].split("_")))
-
-        axes[j].set_ylim(0, 1.05)
-        axes[j].set_xlabel("MSL & MSF")
-
-        if j > 0:
-            axes[j].set_yticklabels([])
-        # end if
-    # end for j
-
-    ax00.plot([], [], marker="o", c="black", label="PR non-AvD")
-    ax00.plot([], [], marker="x", c="black", label="PR AvD")
-    ax01.plot([], [], marker="o", c="red", label="RC non-AvD")
-    ax01.plot([], [], marker="x", c="red", label="RC AvD")
-    ax02.plot([], [], marker="s", c="blue", label="ACC")
-    ax02.plot([], [], marker="d", c="gray", label="FAR")
-
-    ax00.legend(ncol=1)
-    ax01.legend(ncol=1)
-    ax02.legend(ncol=1)
-
-    fig.suptitle(a_ps[a_p] + " problem")
-    fig.subplots_adjust(wspace=0.1, top=0.82)
-
-    pl.show()
-    pl.close()
-# end if
-"""
-
-#%% lines plot -- 5 panels
-"""
-if len(splits) == 5:
-    width = 0.1
-    x1, x2 = np.array([-0.15, -0.05]), np.array([0.05, 0.15])
-
-    fig = pl.figure(figsize=(6, 6))
-
-    ax00 = fig.add_subplot(321)
-    ax01 = fig.add_subplot(322)
-    ax10 = fig.add_subplot(323)
-    ax11 = fig.add_subplot(324)
-    ax20 = fig.add_subplot(325)
-    ax21 = fig.add_subplot(326)
-    axes = [ax00, ax01, ax10, ax11, ax20]
-
-    for j in np.arange(len(test_pers)):
-        i = 0
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][0][0] for min_samp in min_samps],
-                     color="black", marker="o")
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][0][1] for min_samp in min_samps],
-                     color="black", marker="x")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][1][0] for min_samp in min_samps],
-                     color="red", marker="o")
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["cr_vals"][1][1] for min_samp in min_samps],
-                     color="red", marker="x")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["acc_test"] for min_samp in min_samps],
-                     color="blue", marker="s")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["metrics"]["FAR"] for min_samp in min_samps],
-                     color="gray", marker="d")
-
-        axes[j].plot(min_samps, [min_samp_dict[min_samp][0][j]["score"] for min_samp in min_samps],
-                     color="orange", marker="d", linewidth=2)
-        axes[j].set_title("-".join(test_pers[j].split("_")))
-    # end for j
-
-    ax21.axis("off")
-
-    ax21.plot([], [], marker="o", c="black", label="PR non-AvD")
-    ax21.plot([], [], marker="x", c="black", label="PR AvD")
-    ax21.plot([], [], marker="o", c="red", label="RC non-AvD")
-    ax21.plot([], [], marker="x", c="red", label="RC AvD")
-    ax21.plot([], [], marker="s", c="blue", label="ACC")
-    ax21.plot([], [], marker="d", c="gray", label="FAR")
-
-    ax21.legend(ncol=1, loc=(0.2, -0.05))
-
-    ax00.set_xticklabels([])
-    ax01.set_xticklabels([])
-    ax10.set_xticklabels([])
-    ax01.set_yticklabels([])
-    ax11.set_yticklabels([])
-
-    ax11.set_xticks(min_samps)
-    ax11.set_xticklabels(min_samps)
-    ax20.set_xticks(min_samps)
-    ax20.set_xticklabels(min_samps)
-
-    ax00.set_ylabel("Metric")
-    ax10.set_ylabel("Metric")
-    ax20.set_ylabel("Metric")
-    # ax10.set_xlabel("min_sample_leaf & _split")
-    # ax11.set_xlabel("min_sample_leaf & _split")
-    ax20.set_xlabel("MSL & MSF")
-    ax11.set_xlabel("MSL & MSF")
-
-    ax00.set_ylim(0, 1.05)
-    ax01.set_ylim(0, 1.05)
-    ax10.set_ylim(0, 1.05)
-    ax11.set_ylim(0, 1.05)
-    ax20.set_ylim(0, 1.05)
-
-    fig.suptitle(a_ps[a_p] + " problem")
-    fig.subplots_adjust(wspace=0.1, hspace=0.25, top=0.92)
-
-    pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
-    # cw_str = "_".join([str(k).replace(".", "p") for k in class_weight.values()])
-    feats_str = f"{n_best}_{feats}Feats" if feats == "best" else f"{feats}Feats"
-    pl.savefig(pl_path + f"Scores_AllSeasons_{a_p}_{feats_str}_CW{cw_str}.pdf", bbox_inches="tight", dpi=200)
-
-    pl.show()
-    pl.close()
-# end if
-"""
 
 #%% plot my "weighted score" together with sum other more sophisticated scores such as true skill score
 colors1 = ["black", "gray", "red"]
@@ -788,7 +637,7 @@ if len(max_depths) != len(n_estimators):
     p_add += str(max_depths[0]) if len(max_depths) < len(n_estimators) else str(n_estimators[0])
 # end if
 
-pl_path = "/media/kei070/One_Touch/IMPETUS/NORA3/Plots/Model_Evaluation/With_SNOWPACK/WeightedScore_HyppTest/"
+pl_path = f"{obs_path}/IMPETUS/NORA3/Plots/Model_Evaluation/With_SNOWPACK/WeightedScore_HyppTest/"
 # pl.savefig(pl_path + f"WeightedScore_{a_p}_{p_add}.png", dpi=200, bbox_inches="tight")
 pl.savefig(pl_path + f"WSS_TSS_HSS_PSS_{a_p}.png", dpi=200, bbox_inches="tight")
 pl.savefig(pl_path + f"WSS_TSS_HSS_PSS_{a_p}.pdf", dpi=200, bbox_inches="tight")
