@@ -6,7 +6,6 @@ Train the statistical model including SNOWPACK output.
 
 
 #%% imports
-import shap
 import os
 import sys
 import numpy as np
@@ -296,23 +295,6 @@ print(class_rep)
 importances = model.feature_importances_
 
 print("\nFeature importances:", importances, "\n")
-
-
-#%% compute the SHAP values
-explainer = shap.TreeExplainer(model)
-shap_values = explainer(train_x)
-
-
-#%% generate a waterfall plot of some instance
-shap.plots.waterfall(shap_values[1000, :, 0], max_display=10)
-
-
-#%% bar plot
-shap.plots.bar(shap_values[:, :, 1], max_display=10)
-
-
-#%% beeswarm plot
-shap.plots.beeswarm(shap_values[:, :, 1])
 
 
 #%% plot the average of features for AvDs and for non-AvDs
