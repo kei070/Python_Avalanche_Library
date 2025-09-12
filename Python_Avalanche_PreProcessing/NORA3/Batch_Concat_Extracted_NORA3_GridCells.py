@@ -20,7 +20,7 @@ end_yr = 2024
 
 
 #%% execute the script
-for h_low, h_hi in zip([600, 900], [900, 1200]):
+for h_low, h_hi in zip([0, 300, 600, 900], [300, 600, 900, 1200]):
     print(f"\nBetween {h_low} and {h_hi} m\n")
 
     subprocess.call(["python", py_path + "Concat_Extracted_NORA3_GridCell_Data_NC.py", "--sta_yr1", str(sta_yr),
