@@ -14,7 +14,9 @@ The procedure to download and prepare the avalanche danger/problem data from the
 
 The procedure to optimise and train the random forest models is presented in the pdf-document `Doc_Train_ML_Model.pdf`.
 
-The procedure to hindcast and future-project the avalanche-day frequency as well as the generation of the corresponding (and some other) plots are dexcribed in `Doc_Predict_and_Plot.pdf`.
+The procedure to hindcast and future-project the avalanche-day frequency as well as the generation of the corresponding (and some other) plots are dexcribed in `Doc_Predict_and_Plot.pdf`. 
+
+The models and the data used to train them are published on Zenodo (https://doi.org/10.5281/zenodo.17106819). For the data not available in the Zenodo repository, consult the documentation pdfs and see above.
 
 Some packages and their versions used: <br>
 `scikit-learn 1.5.1` <br>
