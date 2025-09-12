@@ -6,6 +6,8 @@ This repository includes the Python package `ava_functions` in the subdirectory 
 to install the package. This is necessary for the other scripts to be functioning.
 Before installing the package, the paths of to the data and scripts must be set in `Ava_Functions/ava_functions/Lists_and_Directories/Paths.py`. The introductory comment in this file gives some information about the general directory structure expected by the other scripts.
 
+To build the SNOWPACK model in a container the following instructions were used: https://research-software.uit.no/blog/2023-building-snowpack/
+
 Some packages and their versions used: <br>
 `scikit-learn 1.5.1` <br>
 `imbalanced-learn 0.12.3` <br>
