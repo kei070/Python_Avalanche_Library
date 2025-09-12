@@ -15,8 +15,8 @@ py_path = f"/{py_path_par}/NORA3/"
 
 
 #%% set height thresholds
-agg_type = "percentile"
-perc = 75
+agg_type = "mean"
+perc = 0
 a_p = "all"
 ndlev = "2"
 
