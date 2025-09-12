@@ -14,7 +14,7 @@ from matplotlib import gridspec
 
 from ava_functions.Model_Fidelity_Metrics import mod_metrics
 from ava_functions.ConfMat_Helper import conf_helper
-from ava_functions.Lists_and_Dictionaries.Paths import path_par
+from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
 from ava_functions.Lists_and_Dictionaries.Features import feats_all
 
 
@@ -218,8 +218,8 @@ ax11.set_yticklabels(["", ""])
 
 fig.subplots_adjust(wspace=0.4, hspace=0.7)
 
-pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
-# pl.savefig(pl_path + "ConfMats_AllProblems.pdf", bbox_inches="tight", dpi=200)
+pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+pl.savefig(pl_path + "ConfMats_AllProblems.pdf", bbox_inches="tight", dpi=200)
 
 pl.show()
 pl.close()
@@ -306,7 +306,7 @@ ax11.set_xlim(0, x_max)
 
 fig.subplots_adjust(wspace=0.75, hspace=0.04)
 
-pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
 pl.savefig(pl_path + "Importances_AllProblems.pdf", bbox_inches="tight", dpi=200)
 
 pl.show()
