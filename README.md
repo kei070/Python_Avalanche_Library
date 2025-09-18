@@ -21,7 +21,10 @@ The models and the data used to train them are published on Zenodo (https://doi.
 Note that the scripts do not generally create the output directories themselves. This must either be implemented in the scripts or the output directories must already exist.
 
 Some packages and their versions used: <br>
-`matplotlib 3.9.1` <br>
-`pandas 2.2.0` <br>
+`matplotlib 3.7.2` <br>
+`pandas 2.0.3` <br>
+`geopandas 0.12.2` <br>
+`seaborn 0.13.1` <br>
+`xarray 2022.11.0` <br>
 `scikit-learn 1.3.0` <br>
 `imbalanced-learn 0.12.3` <br>
