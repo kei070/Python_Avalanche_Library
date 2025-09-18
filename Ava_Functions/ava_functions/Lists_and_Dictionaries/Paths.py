@@ -48,6 +48,8 @@ For the scripts to work properly (without further changes), the directory struct
         f"{path_par}/IMPETUS/{source}/Snowpack/"
     where source is either "NORA3" or "NorCP".
 
+    The SNOWPACK-derived indices are stored in
+        f"{path_par}/IMPETUS/NORA3/Snowpack/Timeseries/Daily/Flat/"
 """
 
 

@@ -19,5 +19,7 @@ The procedure to hindcast and future-project the avalanche-day frequency as well
 The models and the data used to train them are published on Zenodo (https://doi.org/10.5281/zenodo.17106819). For the data not available in the Zenodo repository, consult the documentation pdfs and see above.
 
 Some packages and their versions used: <br>
+`matplotlib 3.9.1` <br>
+`pandas 2.2.0` <br>
 `scikit-learn 1.5.1` <br>
 `imbalanced-learn 0.12.3` <br>
