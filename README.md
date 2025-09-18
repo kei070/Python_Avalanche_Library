@@ -28,3 +28,8 @@ Some packages and their versions used: <br>
 `xarray 2022.11.0` <br>
 `scikit-learn 1.3.0` <br>
 `imbalanced-learn 0.12.3` <br>
+
+Using Conda, functionality could be reproduced with an environment built (on 18 Sep 2025) with the following command:
+
+`conda create -n ava_env matplotlib pandas geopandas seaborn xarray scikit-learn=1.3.0 imbalanced-learn=0.12.3` 
+
