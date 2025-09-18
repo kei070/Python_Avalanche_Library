@@ -17,13 +17,7 @@ import pandas as pd
 import pylab as pl
 from joblib import load
 
-# import proprietary functions and variables
-from Statistical_Prediction.Functions.Func_Prep_Data_Avalanche_Analysis_XLevel import load_feats_xlevel
-# from Statistical_Prediction.Functions.Func_Feature_Selection import feat_sel
-from Statistical_Prediction.Lists_and_Dictionaries.Paths import path_par
-
-from ava_functions.Data_Loading import load_features2, load_snowpack_stab, load_agg_feats_adl
-from ava_functions.Lists_and_Dictionaries.Features import se_norge_feats, nora3_clean
+from ava_functions.Data_Loading import load_snowpack_stab, load_agg_feats_adl
 from ava_functions.Lists_and_Dictionaries.Paths import path_par
 from ava_functions.Feature_Selection import feat_sel
 
