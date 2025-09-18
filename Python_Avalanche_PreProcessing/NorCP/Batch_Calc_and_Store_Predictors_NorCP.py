@@ -11,7 +11,7 @@ from ava_functions.Lists_and_Dictionaries.Paths import py_path_par
 
 
 #%% set the paths to the scripts
-py_path = f"/{py_path_par}/NorCP/"
+py_path = f"/{py_path_par}/Python_Avalanche_Library/Python_Avalanche_PreProcessing/NorCP/"
 
 
 #%% set height thresholds

@@ -8,7 +8,7 @@ Fix the 1985 NSW data.
 #%% imports
 import numpy as np
 from netCDF4 import Dataset
-from ava_functions.Lists_and_Dictionaries.Paths import nora3_sub_path, path_par
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set paths

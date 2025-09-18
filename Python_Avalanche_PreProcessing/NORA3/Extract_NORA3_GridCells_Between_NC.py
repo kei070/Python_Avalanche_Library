@@ -19,7 +19,7 @@ from datetime import datetime
 import pylab as pl
 
 from ava_functions.Progressbar import print_progress_bar
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, nora3_sub_path
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 from ava_functions.Lists_and_Dictionaries.Variable_Name_NORA3_NorCP import varn_nora3
 
 
@@ -68,8 +68,7 @@ var.pop("rain")
 
 
 #%% load the nc file for the chosen year
-# data_path = f"{path_par}/IMPETUS/NORA3/NORA3_NorthNorway_Sub/Annual_Files/"
-data_path = f"{nora3_sub_path}/IMPETUS/NORA3/NORA3_NorthNorway_Sub/Annual_Files/"
+data_path = f"{path_par}/IMPETUS/NORA3/NORA3_NorthNorway_Sub/Annual_Files/"
 
 
 #%% loop over the years

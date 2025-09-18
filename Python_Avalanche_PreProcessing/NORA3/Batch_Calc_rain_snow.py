@@ -13,7 +13,7 @@ from ava_functions.Lists_and_Dictionaries.Region_Codes import regions
 
 
 #%%% set the paths to the scripts
-py_path = f"{py_path_par}/NORA3/"
+py_path = f"{py_path_par}/Python_Avalanche_Library/Python_Avalanche_PreProcessing/NORA3/"
 
 
 #%% execute the script

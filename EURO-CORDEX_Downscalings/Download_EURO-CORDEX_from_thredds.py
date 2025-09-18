@@ -10,7 +10,7 @@ import glob
 import subprocess
 import numpy as np
 
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, path_par2, path_par3
+from ava_functions.Lists_and_Dictionaries.Paths import path_par3
 
 
 #%% set parameters for the download

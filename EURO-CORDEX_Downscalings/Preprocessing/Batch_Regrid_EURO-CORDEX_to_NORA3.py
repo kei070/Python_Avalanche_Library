@@ -6,12 +6,12 @@ Batch regrid the EURO-CORDEX data.
 #%% imports
 import subprocess
 
-from ava_functions.Lists_and_Dictionaries.Paths import py_par_path
+from ava_functions.Lists_and_Dictionaries.Paths import py_path_par
 from ava_functions.Lists_and_Dictionaries.Region_Codes import regions
 
 
 #%% set the paths to the scripts
-py_path = f"/{py_par_path}/EURO-CORDEX_Downscalings/Preprocessing/"
+py_path = f"/{py_path_par}/Python_Avalanche_Library/EURO-CORDEX_Downscalings/Predictor_Calculations/"
 
 
 #%% set the scenarios

@@ -11,7 +11,7 @@ from Lists_and_Dictionaries.Paths import py_path_par
 
 
 #%% set the paths to the scripts
-py_path = f"/{py_path_par}/"
+py_path = f"/{py_path_par}/Python_Avalanche_Library/Python_Avalanche_PreProcessing/"
 
 
 #%% set height thresholds

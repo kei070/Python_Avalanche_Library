@@ -57,15 +57,13 @@ import sys
 import numpy as np
 import pandas as pd
 import pylab as pl
-from datetime import datetime
 import argparse
 from snowpacktools.snowpro import snowpro
 from ava_functions.DatetimeSimple import date_dt
-from ava_functions.Assign_Winter_Year import assign_winter_year
 from ava_functions.Snowpack_Helpers import tsa
 from ava_functions.Progressbar import print_progress_bar
 from ava_functions.Lists_and_Dictionaries.Region_Codes import regions
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, path_par2
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set up the parser
@@ -185,7 +183,7 @@ if retry_wo_yr:
                 sys.exit("Calculation would likely be redundant. Stopping.")
             # end if
             print("\nSNOWPACK data loading failed. Retrying without the given year range...\n")
-            spack_path = f"{path_par2}/IMPETUS/{source}/Snowpack/Output/{slope_path}/" + \
+            spack_path = f"{path_par}/IMPETUS/{source}/Snowpack/Output/{slope_path}/" + \
                                                                        f"Between{h_low}_{h_hi}m/{model}{scen}{per_str}/"
             out_path = f"{path_par}/IMPETUS/{source}/Snowpack/Timeseries/Hourly/{model}{scen}{per_str}/" + \
                                                                                  f"{slope_path}/Between{h_low}_{h_hi}m/"

@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: ava-functions
+Name: ava_functions
 Version: 0.0.1
 Summary: Functions to help the avalanche danger level machine learning application.
 Author: Kai-Uwe Eiselt
@@ -10,4 +10,4 @@ License-File: LICENSE.txt
 # Ava_Functions
 
 This is a package containing all the Python functions written for the machine-learning application to statistically
-predict the avalanche danger level based on meteorological and snow data.
+predict the avalanche danger level based on meteorological and snow data in northern Norway.

@@ -10,7 +10,7 @@ Note that we need the conda environment n3_down to execute the download scripts.
 
 #%% imports
 import subprocess
-from ava_functions.Lists_and_Dictionaries.Paths import py_par_path
+from ava_functions.Lists_and_Dictionaries.Paths import py_path_par
 
 
 #%% parameters
@@ -18,7 +18,7 @@ perform_download = False  # set to true if the download is desired
 
 
 #%% set paths
-py_path = f"{py_par_path}/Avalanche_Assessment_NVE/"
+py_path = f"{py_path_par}/Python_Avalanche_Library/Avalanche_Assessment_NVE/"
 
 
 #%% perform the procedure

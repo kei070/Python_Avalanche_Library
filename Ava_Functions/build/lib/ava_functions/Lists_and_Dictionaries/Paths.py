@@ -24,46 +24,42 @@ For the scripts to work properly (without further changes), the directory struct
     in case of the 5-level target and
         reg_code = 3013  # 3009, ...
         f_name_all = f"Features_{ndlev}Level_All_{agg_str}_Between400_900m_{reg_code}_{region}.csv"
-        f_name_bal = f"Features_{ndlev}Level_{agg_str}_Balanced_Between400_900m_{reg_code}_{region}.csv"
 
-    where "All" indicates all data and "Balanced" indicates that a balancing by undersampling majority classes was
-    undertaken. That is, the number of elements per class (i.e., danger level) was equalised to the number of elements
-    in the smallest class. Note that this reduces that data that is used to train the model and is (so far) only
-    feasible for the case of ndlev = 2, because for 3 or 4 danger levels too much data is removed. In the latter cases,
-    oversampling or internal class balancing is suggested.
-    Note that there also exist concatenated files containing the data for all regions combined:
-        f_name_all = f"Features_{ndlev}Level_All_Between400_900m_AllReg.csv"
-        f_name_bal = f"Features_{ndlev}Level_Balanced_Between400_900m_AllReg.csv"
+    After the predictive features are aggregated across elevation bands, the will be stored in
+        f"{path_par}/IMPETUS/NORA3/Avalanche_Predictors_{ndlev}Level/{agg_str}/"
 
-    This is a redundancy and might be changed in the future.
+    with file names such as Features_2Level_All_Mean_ElevAgg_3009_NordTroms.csv
+
+    The machine-learning models are stored in the directory
+        f"{path_par}/IMPETUS/NORA3/Stored_Models/Mean/Elev_Agg/"
+
+    The avalanche danger data from NVE are expected to be stored in
+        f"{obs_path}/IMPETUS/Avalanche_Danger_Data/"
+
+    The NORA3 annual files after concatination with
+        Concat_Monthly_NORA3_Files_To_Annual.py
+    are expected to be stored in
+        f"{path_par}/IMPETUS/NORA3/NORA3_NorthNorway_Sub/Annual_Files/"
+
+    The Python parent path (py_path_par) should point to the directory in which Python_Avalanche_Library is located.
+
+    To be able to execute SNOWPACK from the Python scripts in the Snowpack directory in this Package the SNOWPACK .sif
+    container should be located in:
+        f"{path_par}/IMPETUS/{source}/Snowpack/"
+    where source is either "NORA3" or "NorCP".
+
 """
 
 
-# external hard drive
-path_par = "/media/kei070/One_Touch/"
-path_par2 = "/media/kei070/My Passport/Work/"
-path_par3 = "/media/kei070/Seagate/"
-
-# Saga
-# path_par = "/cluster/work/users/kei070/Data/"
+# external hard drive --- you can of course set all to the same directory
+path_par = ""    # NORA3 & NorCP data (mostly predictive features); the Skred data observations (Fig. 1 in the paper)
+path_par3 = ""   # EURO-CORDEX data; some raw NORA3 and NorCP data
 
 # path to danger level "observations"
-obs_path = "/home/kei070/Documents/"
+obs_path = ""
 
 # path to data required for running seNorge
-path_seNorge = "/home/kei070/Documents/"
-
-# path to data required for running seNorge
-path_scripts = "/home/kei070/Documents/Python_Avalanche_Libraries/Python_Avalanche_PreProcessing/NorCP/"
-
-# path to Satskred
-satsk_path = "/media/kei070/My Passport/Work/IMPETUS/Satskred/"
-
-# NORA3 path on MyPassport
-nora3_sub_path = "/media/kei070/My Passport/Work/"
+path_scripts = ""
 
 # python scripts path
-py_path_par = "/home/kei070/Documents/Python_Avalanche_Libraries/Python_Avalanche_PreProcessing/"
-
-# python scripts path paranet
-py_par_path = "/home/kei070/Documents/Python_Avalanche_Libraries/"
+py_path_par = ""

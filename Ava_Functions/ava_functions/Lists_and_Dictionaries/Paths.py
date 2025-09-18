@@ -30,13 +30,30 @@ For the scripts to work properly (without further changes), the directory struct
 
     with file names such as Features_2Level_All_Mean_ElevAgg_3009_NordTroms.csv
 
+    The machine-learning models are stored in the directory
+        f"{path_par}/IMPETUS/NORA3/Stored_Models/Mean/Elev_Agg/"
+
+    The avalanche danger data from NVE are expected to be stored in
+        f"{obs_path}/IMPETUS/Avalanche_Danger_Data/"
+
+    The NORA3 annual files after concatination with
+        Concat_Monthly_NORA3_Files_To_Annual.py
+    are expected to be stored in
+        f"{path_par}/IMPETUS/NORA3/NORA3_NorthNorway_Sub/Annual_Files/"
+
+    The Python parent path (py_path_par) should point to the directory in which Python_Avalanche_Library is located.
+
+    To be able to execute SNOWPACK from the Python scripts in the Snowpack directory in this Package the SNOWPACK .sif
+    container should be located in:
+        f"{path_par}/IMPETUS/{source}/Snowpack/"
+    where source is either "NORA3" or "NorCP".
+
 """
 
 
-# external hard drive
-path_par = ""
-path_par2 = ""
-path_par3 = ""
+# external hard drive --- you can of course set all to the same directory
+path_par = ""    # NORA3 & NorCP data (mostly predictive features); the Skred data observations (Fig. 1 in the paper)
+path_par3 = ""   # EURO-CORDEX data; some raw NORA3 and NorCP data
 
 # path to danger level "observations"
 obs_path = ""
@@ -44,11 +61,5 @@ obs_path = ""
 # path to data required for running seNorge
 path_scripts = ""
 
-# NORA3 path on MyPassport
-nora3_sub_path = ""
-
 # python scripts path
 py_path_par = ""
-
-# python scripts path parent
-py_par_path = ""
