@@ -21,5 +21,5 @@ The models and the data used to train them are published on Zenodo (https://doi.
 Some packages and their versions used: <br>
 `matplotlib 3.9.1` <br>
 `pandas 2.2.0` <br>
-`scikit-learn 1.5.1` <br>
+`scikit-learn 1.3.0` <br>
 `imbalanced-learn 0.12.3` <br>
