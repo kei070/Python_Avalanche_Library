@@ -53,7 +53,10 @@ elev_n = ""
 if ((slope_angle == "agg") | (slope_azi == "agg")):
     elev_dir = "/ElevSlope_Agg/"
 if ((h_low > -1) & (h_hi > -1)):
-    elev_dir = f"/Between{h_low}_and_{h_hi}m/"
+    elev_dir = f"/Between{h_low}_and_{h_hi}m/"#%% generate the output path
+os.makedirs()
+
+
     elev_n = f"_Between{h_low}_and_{h_hi}m"
 # end if
 
