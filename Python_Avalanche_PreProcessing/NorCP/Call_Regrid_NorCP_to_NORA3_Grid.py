@@ -7,10 +7,11 @@ Call the regrid NorCP to NORA3 script.
 
 #%% imports
 import subprocess
-from ava_functions.Lists_and_Dictionaries.Paths import path_scripts as py_path
+from ava_functions.Lists_and_Dictionaries.Paths import py_path_par
 
 
 #%% set paths
+py_path = f"{py_path_par}/Python_Avalanche_PreProcessing/NorCP/"
 py_name = "Regrid_NorCP_to_NORA3_Grid.py"
 
 

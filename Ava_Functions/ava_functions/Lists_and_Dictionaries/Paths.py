@@ -58,8 +58,5 @@ path_par3 = ""   # EURO-CORDEX data; some raw NORA3 and NorCP data
 # path to danger level "observations"
 obs_path = ""
 
-# path to data required for running seNorge
-path_scripts = ""
-
 # python scripts path
 py_path_par = ""
