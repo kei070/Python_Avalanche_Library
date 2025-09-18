@@ -24,18 +24,12 @@ For the scripts to work properly (without further changes), the directory struct
     in case of the 5-level target and
         reg_code = 3013  # 3009, ...
         f_name_all = f"Features_{ndlev}Level_All_{agg_str}_Between400_900m_{reg_code}_{region}.csv"
-        f_name_bal = f"Features_{ndlev}Level_{agg_str}_Balanced_Between400_900m_{reg_code}_{region}.csv"
 
-    where "All" indicates all data and "Balanced" indicates that a balancing by undersampling majority classes was
-    undertaken. That is, the number of elements per class (i.e., danger level) was equalised to the number of elements
-    in the smallest class. Note that this reduces that data that is used to train the model and is (so far) only
-    feasible for the case of ndlev = 2, because for 3 or 4 danger levels too much data is removed. In the latter cases,
-    oversampling or internal class balancing is suggested.
-    Note that there also exist concatenated files containing the data for all regions combined:
-        f_name_all = f"Features_{ndlev}Level_All_Between400_900m_AllReg.csv"
-        f_name_bal = f"Features_{ndlev}Level_Balanced_Between400_900m_AllReg.csv"
+    After the predictive features are aggregated across elevation bands, the will be stored in
+        f"{path_par}/IMPETUS/NORA3/Avalanche_Predictors_{ndlev}Level/{agg_str}/"
 
-    This is a redundancy and might be changed in the future.
+    with file names such as Features_2Level_All_Mean_ElevAgg_3009_NordTroms.csv
+
 """
 
 
