@@ -29,7 +29,7 @@ Some packages and their versions used: <br>
 `scikit-learn 1.3.0` <br>
 `imbalanced-learn 0.12.3` <br>
 
-Using Conda, functionality could be reproduced with an environment built (on 18 Sep 2025) with the following command:
+Using conda version 25.7.0, functionality was partly reproduced with an environment built (on 18 Sep 2025) with the following command:
 
 `conda create -n ava_env matplotlib pandas geopandas seaborn xarray scikit-learn=1.3.0 imbalanced-learn=0.12.3` 
 
