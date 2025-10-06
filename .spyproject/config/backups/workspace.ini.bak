@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['Ava_Functions/ava_functions/Lists_and_Dictionaries/Paths.py', 'Avalanche_Plot_Scripts/NORA3_and_NorCP/Gen_ADF_Model_With_SNOWPACK_NorCP.py']
+recent_files = ['Ava_Functions/ava_functions/Lists_and_Dictionaries/Paths.py', 'Python_Avalanche_PreProcessing/NorCP/Call_Regrid_NorCP_to_NORA3_Grid.py', 'Avalanche_Plot_Scripts/NORA3_and_NorCP/Gen_ADF_Model_With_SNOWPACK_fullNORA3.py', 'Python_Avalanche_Prediction/Iterative_Feature_Search.py']
 
 [main]
 version = 0.2.0
