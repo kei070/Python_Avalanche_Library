@@ -6,23 +6,17 @@ Perform a leave-one-out validation of random forest model.
 
 
 #%% imports
-import os
 import sys
 import numpy as np
 import pandas as pd
 import pylab as pl
-import seaborn as sns
-from matplotlib import gridspec
 from timeit import default_timer as timer
-from joblib import dump, Parallel, delayed
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, precision_recall_fscore_support
-from ava_functions.Data_Loading import load_features2, load_snowpack_stab, load_agg_feats_adl
+from joblib import Parallel, delayed
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support
+from ava_functions.Data_Loading import load_snowpack_stab, load_agg_feats_adl
 from ava_functions.Helpers_Load_Data import extract_sea
-from ava_functions.Lists_and_Dictionaries.Region_Codes import regions
 from ava_functions.StatMod import stat_mod
-from ava_functions.ConfMat_Helper import conf_helper
 from ava_functions.Model_Fidelity_Metrics import mod_metrics, dist_metrics
-from ava_functions.Lists_and_Dictionaries.Features import se_norge_feats, nora3_clean
 from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
 
 
@@ -305,7 +299,7 @@ for max_depth in max_depths:
             hypp_set = {'n_estimators':n_estimator,  # [100, 200, 300],
                         'max_depth':max_depth,  # [2, 5, 8, 11, 14, 17, 20],
                         'min_samples_leaf':min_samp,
-                        'min_samples_split':min_samp,
+                        'min_samples_split':2,
                         'max_features':"sqrt",
                         'bootstrap':True
                         }
@@ -389,8 +383,8 @@ if len(splits) == 4:
     ax10.set_ylabel("Metric")
     # ax10.set_xlabel("min_sample_leaf & _split")
     # ax11.set_xlabel("min_sample_leaf & _split")
-    ax10.set_xlabel("MSL & MSF")
-    ax11.set_xlabel("MSL & MSF")
+    ax10.set_xlabel("MSL")
+    ax11.set_xlabel("MSL")
 
     ax00.set_ylim(0, 1)
     ax01.set_ylim(0, 1)
@@ -455,9 +449,9 @@ if len(splits) == 3:
     ax01.legend(ncol=1)
     ax02.legend(ncol=1)
 
-    ax00.set_xlabel("MSL & MSF")
-    ax01.set_xlabel("MSL & MSF")
-    ax02.set_xlabel("MSL & MSF")
+    ax00.set_xlabel("MSL")
+    ax01.set_xlabel("MSL")
+    ax02.set_xlabel("MSL")
 
     ax01.set_yticklabels([])
     ax02.set_yticklabels([])
@@ -627,7 +621,7 @@ if len(max_depths) != len(n_estimators):
 # end if
 
 ax00.set_ylabel("Score")
-ax00.set_xlabel("MSL & MSF")
+ax00.set_xlabel("MSL")
 ax00.set_title(f"Scores {a_ps[a_p]} problem")
 
 ax00.set_ylim(0, 1)
@@ -665,7 +659,7 @@ ax00.errorbar(min_samps, precis1_means, yerr=precis1_stds, color="gray", linesty
 ax00.legend()
 
 ax00.set_ylabel("Score")
-ax00.set_xlabel("MSL & MSF")
+ax00.set_xlabel("MSL")
 ax00.set_title(f"Scores {a_ps[a_p]} problem")
 
 pl.show()
@@ -778,7 +772,7 @@ if len(max_depths) != len(n_estimators):
 # end if
 
 ax00.set_ylabel("Score")
-ax00.set_xlabel("MSL & MSF")
+ax00.set_xlabel("MSL")
 ax00.set_title(f"Distribution measures {a_ps[a_p]} problem")
 
 ax00.set_ylim((0, 1))
