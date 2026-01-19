@@ -6,6 +6,7 @@ Train the statistical model including SNOWPACK output.
 
 
 #%% imports
+import shap
 import os
 import sys
 import numpy as np
@@ -14,23 +15,22 @@ import pylab as pl
 import seaborn as sns
 from joblib import dump
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, precision_recall_fscore_support
+from sklearn.tree import plot_tree
 from ava_functions.Model_Fidelity_Metrics import dist_metrics
-from ava_functions.Data_Loading import load_features2, load_snowpack_stab, load_agg_feats_adl
+from ava_functions.Data_Loading import load_snowpack_stab, load_agg_feats_adl
 from ava_functions.Helpers_Load_Data import extract_sea
 from ava_functions.Lists_and_Dictionaries.Region_Codes import regions
 from ava_functions.StatMod import stat_mod
 from ava_functions.ConfMat_Helper import conf_helper
-from ava_functions.Lists_and_Dictionaries.Features import se_norge_feats, nora3_clean
 from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set parameters
-n_best = 0  # set to 0 to use all best features -- this is required to generate a new best features list
-feats = "all"
-a_p = "wind_slab"
+n_best = 20  # set to 0 to use all best features -- this is required to generate a new best features list
+feats = "best"
+a_p = "y"
 
-min_leaf = 30
-min_split = 30
+min_leaf = 10
 
 class_weight = {0:1, 1:1}
 cw_str = f"CW{'_'.join([str(k).replace('.', 'p') for k in class_weight.values()])}"
@@ -45,16 +45,22 @@ with_snowpack = True
 model_ty = "RF"
 sea = "full"
 balancing = "external"
-balance_meth = "SMOTE"
+balance_meth = "SMOTE"  # "None"
 ndlev = 2
 split = [2021, 2023]
-# reg_codes = [3010, 3011, 3012]
-# reg_codes = [3009, 3013]
+
 reg_code = 0
+elev_suff = "ElevAgg"  # ElevSlope_Agg  # ElevComb
 agg_type = "mean"
 perc = 75
 h_low = -1
 h_hi = -1
+
+perform_shap = False
+
+
+# keep the following parameter constant at 2
+min_split = 2  # for the reasoning see the introductory text to Manual_CV_Check_Model_with_SNOWPACK_Multi.py
 
 """
 hypp_set = {'n_estimators':350,  # [100, 200, 300],
@@ -152,6 +158,8 @@ if ((slope_angle == "agg") | (slope_azi == "agg")):
 if ((h_low > -1) & (h_hi > -1)):
     elev_dir = f"/Between{h_low}_and_{h_hi}m/"
     elev_n = f"_Between{h_low}_and_{h_hi}m"
+if ((h_low == -2) & (h_hi == -2)):
+    elev_dir = "/Elev_Comb/"
 # end if
 
 
@@ -209,15 +217,14 @@ elif feats == "best":
 
 
 #%% load the NORA3-derived features
-# feats_n3 = load_features2(ndlev=ndlev, reg_codes=reg_codes, h_low=h_low, h_hi=h_hi,
-#                           agg_type="mean", perc=90, nan_handling="drop")
-feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type, perc=perc)
+feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type, perc=perc, elev_suff=elev_suff)
 
 
 #%% include SNOWPACK-derived stability indices if requested
 if with_snowpack:
     #% load the SNOWPACK-derived stability indices
-    sno_stab = load_snowpack_stab(reg_codes=reg_codes, slope_angle=slope_angle, slope_azi=slope_azi)
+    sno_stab = load_snowpack_stab(reg_codes=reg_codes, slope_angle=slope_angle, slope_azi=slope_azi,
+                                  elev_suff=elev_suff)
 
 
     #% merge the dataframes
@@ -231,6 +238,11 @@ if with_snowpack:
 else:
     feats_df = feats_n3
 # end if else
+
+
+#%% in case of the elevation-combined features there will be NaNs in the SNOWPACK data since some of the simulations
+#   did not work; we replace them with zeros
+feats_df.fillna(0, inplace=True)
 
 
 #%% add and remove the manually requested features to the selected features
@@ -250,10 +262,21 @@ feats_df = feats_df[sel_feats]
 
 
 #%% split training and test
-train_x, test_x, train_y, test_y, train_x_all, test_x_all, train_y_all, test_y_all =\
-                       extract_sea(all_df=feats_df, drop=drop, split=split, balance_meth=balance_meth,
-                                   target_n=a_p, ord_vars=["ftc_emax", "ava_clim"],
-                                   ord_lims={"ftc_emax":[0, 1], "ava_clim":[1, 3]})
+if balance_meth == "None":
+
+    train_x, test_x, train_y, test_y =\
+                           extract_sea(all_df=feats_df, drop=drop, split=split, balance_meth=balance_meth,
+                                       target_n=a_p, ord_vars=["ftc_emax", "ava_clim"],
+                                       ord_lims={"ftc_emax":[0, 1], "ava_clim":[1, 3]})
+    train_x_all, test_x_all, train_y_all, test_y_all = train_x, test_x, train_y, test_y
+
+else:
+    train_x, test_x, train_y, test_y, train_x_all, test_x_all, train_y_all, test_y_all =\
+                           extract_sea(all_df=feats_df, drop=drop, split=split, balance_meth=balance_meth,
+                                       target_n=a_p, ord_vars=["ftc_emax", "ava_clim"],
+                                       ord_lims={"ftc_emax":[0, 1], "ava_clim":[1, 3]})
+
+# end if
 
 
 #%% set up the model
@@ -275,6 +298,8 @@ model.fit(train_x, train_y)
 #%% predict
 pred_test = model.predict(test_x)
 pred_test_all = model.predict(test_x_all)
+pred_train = model.predict(train_x)
+pred_train_all = model.predict(train_x_all)
 
 
 #%% model accuracy
@@ -297,7 +322,27 @@ importances = model.feature_importances_
 print("\nFeature importances:", importances, "\n")
 
 
+#%% compute the SHAP values
+if perform_shap:
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer(train_x)
+
+
+    #% generate a waterfall plot of some instance
+    shap.plots.waterfall(shap_values[1000, :, 0], max_display=10)
+
+
+    #% bar plot
+    shap.plots.bar(shap_values[:, :, 1], max_display=10)
+
+
+    #% beeswarm plot
+    shap.plots.beeswarm(shap_values[:, :, 1])
+# end if
+
+
 #%% plot the average of features for AvDs and for non-AvDs
+"""
 y_lim = None  # (-1, 1)
 
 var_bpl = "s7_emin"
@@ -321,6 +366,7 @@ print(f"{var_bpl} non-AvD mean +- std: {np.mean(train_x[var_bpl][train_y == 0]):
       f"{np.std(train_x[var_bpl][train_y == 0]):.3f}")
 print(f"{var_bpl} AvD mean +- std:     {np.mean(train_x[var_bpl][train_y == 1]):.2f} +- " +
       f"{np.std(train_x[var_bpl][train_y == 1]):.3f}")
+"""
 
 
 #%% plot feature importances
@@ -405,6 +451,44 @@ pl.show()
 pl.close()
 
 
+#%% bar plot of the distribution of true and predicted
+pred_c = "red"
+true_c = "black"
+pred_w = 0.7
+true_w = 0.4
+
+fig = pl.figure(figsize=(6, 2))
+ax00 = fig.add_subplot(121)
+ax01 = fig.add_subplot(122)
+
+ax00.bar(x=0, height=np.sum(test_y_all == 0), facecolor="none", edgecolor=true_c, width=true_w, label="true")
+ax00.bar(x=0, height=np.sum(pred_test_all == 0), facecolor="none", edgecolor=pred_c, width=pred_w, label="predicted")
+ax00.bar(x=1, height=np.sum(test_y_all == 1), facecolor="none", edgecolor=true_c, width=true_w)
+ax00.bar(x=1, height=np.sum(pred_test_all == 1), facecolor="none", edgecolor=pred_c, width=pred_w)
+
+ax01.bar(x=0, height=np.sum(train_y_all == 0), facecolor="none", edgecolor=true_c, width=true_w)
+ax01.bar(x=0, height=np.sum(pred_train_all == 0), facecolor="none", edgecolor=pred_c, width=pred_w)
+ax01.bar(x=1, height=np.sum(train_y_all == 1), facecolor="none", edgecolor=true_c, width=true_w)
+ax01.bar(x=1, height=np.sum(pred_train_all == 1), facecolor="none", edgecolor=pred_c, width=pred_w)
+
+ax00.legend()
+
+ax00.set_xticks([0, 1])
+ax01.set_xticks([0, 1])
+ax00.set_xticklabels(["non-AvD", "AvD"])
+ax01.set_xticklabels(["non-AvD", "AvD"])
+
+ax00.set_ylabel("Frequency")
+ax00.set_title("Test data")
+ax01.set_title("Training data")
+
+fig.suptitle(a_p)
+fig.subplots_adjust(wspace=0.3, top=0.82)
+
+pl.show()
+pl.close()
+
+
 #%% generate a suffix for the number of features
 nbest_suff = ""
 if feats == "best":
@@ -455,7 +539,7 @@ if gen_new_best_feats:
 
 
 #%% experiment with the "distribution-oriented" measures suggested in Murphy (1993)
-
+"""
 # reliability
 reli_part = []
 for lev_pred in np.arange(ndlev):
@@ -476,8 +560,11 @@ for lev_true in np.arange(ndlev):
     disc1_part.append(lev_true - lev_pred)
 # end for lev
 print(f"\nThe discrimination 1 is {np.mean(disc1_part)}")
-
+"""
 
 #%% calculate some of the distribution-oriented metrics suggested in Murphy (1993)
-dist_metrics_test = dist_metrics(test_y, pred_test, verbose=True)
+# dist_metrics_test = dist_metrics(test_y, pred_test, verbose=True)
 
+
+#%% look into some of the individual decision trees
+# plot_tree(model.estimators_[0])
