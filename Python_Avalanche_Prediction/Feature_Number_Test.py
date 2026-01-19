@@ -6,7 +6,6 @@ Test the change of model skill with the number of features included in model tra
 
 
 #%% imports
-import os
 import sys
 import json
 import argparse
@@ -14,25 +13,22 @@ import numpy as np
 import pandas as pd
 import pylab as pl
 from timeit import default_timer as timer
-from joblib import load, Parallel, delayed
-from sklearn.model_selection import PredefinedSplit, cross_val_score
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import make_pipeline
+from joblib import Parallel, delayed
 from sklearn.metrics import confusion_matrix
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, precision_recall_fscore_support
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 from ava_functions.Model_Fidelity_Metrics import mod_metrics, dist_metrics
-from ava_functions.Data_Loading import load_features2, load_snowpack_stab, load_agg_feats_adl
-from ava_functions.Lists_and_Dictionaries.Features import se_norge_feats, nora3_clean
+from ava_functions.Data_Loading import load_snowpack_stab, load_agg_feats_adl
 from ava_functions.Lists_and_Dictionaries.Paths import path_par
 from ava_functions.Helpers_Load_Data import extract_sea
 from ava_functions.StatMod import stat_mod
-from ava_functions.Progressbar import print_progress_bar
 
 
 #%% set up the parser
 min_leaf = 10
-min_split = 10
+
+# keep the following parameter constant at 2
+min_split = 2  # for the reasoning see the introductory text to Manual_CV_Check_Model_with_SNOWPACK_Multi.py
 
 parser = argparse.ArgumentParser(
                     prog="FeatureNumberTest",
@@ -65,16 +61,20 @@ parser.add_argument("--split", nargs="*", default=[2021, 2023],
                     help="""Fraction of data to be used as test data.""")
 parser.add_argument("--balancing", type=str, default="external", choices=["none", "internal", "external"],
                     help="""Controls the kind of balancing to be performed.""")
+
 parser.add_argument("--balance_meth", type=str, default="SMOTE",
                     choices=["undersample", "rus", "ros", "SMOTE", "ADASYN"],
                     help="""The balancing method applied during the loading of the data. This is only relevant if
                     balancing is set to external.""")
+
 parser.add_argument("--scale_x", action="store_true", help="Perform a predictor scaling.")
 parser.add_argument("--sea", type=str, default="full", choices=["full", "winter", "spring"],
                     help="""The season for which the model is trained. The choices mean: full=Dec-May, winter=Dec-Feb,
                     spring=Mar-May.""")
-parser.add_argument("--h_low", type=int, default=-1, help="The lower threshold of the grid cell altitude.")
-parser.add_argument("--h_hi", type=int, default=-1, help="The upper threshold of the grid cell altitude.")
+parser.add_argument("--h_low", type=int, default=-1, help="""The lower threshold of the grid cell altitude. Set to
+                    -1 for elevation aggregation and to -2 for elevation combination.""")
+parser.add_argument("--h_hi", type=int, default=-1, help="""The upper threshold of the grid cell altitude. Set to
+                    -1 for elevation aggregation and to -2 for elevation combination.""")
 parser.add_argument("--reg_code", type=int, default=0, help="""The region code of the region for which the danger levels
                     will be predicted. Set 0 (default) to use all regions.""")
 parser.add_argument("--agg_type", default="mean", type=str, choices=["mean", "median", "percentile"],
@@ -108,6 +108,9 @@ print(f"\nUsing the following class weights: {class_weight}\n")
 # two years as validation data
 # splits = [[2017, 2018], [2019, 2020], [2022, 2024]] #  [2021, 2022], [2023, 2024]]
 splits = [[2018], [2019], [2020], [2022], [2024]]
+# splits = [[2019], [2020], [2021], [2023], [2024]]
+# splits = [[2018], [2020], [2021], [2022], [2023]]
+# splits = [[2018], [2019], [2021], [2023], [2024]]
 
 # leave-one-out validation
 # splits = [[2017], [2018], [2019], [2020], [2022], [2024]] #  [2021, 2022], [2023, 2024]]
@@ -133,10 +136,9 @@ except:
 max_n_feat = 60
 min_n_feat = 10
 dn_feat = 10
-add_ante = [15]
-add_post = []
+arbitrary_add = [15, 35]
 
-n_bests = add_ante + list(np.arange(min_n_feat, max_n_feat+1, dn_feat)) + add_post
+n_bests = sorted(arbitrary_add + list(np.arange(min_n_feat, max_n_feat+1, dn_feat)))
 
 
 #%% set with_snowpack to true for the time being
@@ -182,6 +184,7 @@ balance_meth = args.balance_meth
 scale_x = args.scale_x
 agg_type = args.agg_type
 perc = args.perc
+elev_suff = "ElevAgg"
 
 if args.reg_code == 0:
     reg_code = "AllReg"  #  sys.argv[1]
@@ -227,6 +230,9 @@ if ((slope_angle == "agg") | (slope_azi == "agg")):
 if ((h_low > -1) & (h_hi > -1)):
     elev_dir = f"/Between{h_low}_and_{h_hi}m/"
     elev_n = f"_Between{h_low}_and_{h_hi}m"
+if ((h_low == -2) & (h_hi == -2)):
+    elev_dir = "/Elev_Comb/"
+    elev_n = ""
 # end if
 
 
@@ -278,13 +284,14 @@ sel_feats = np.append(sel_feats, a_p)
 
 
 #%% load the NORA3-derived features
-feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type)
+feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type, elev_suff=elev_suff)
 
 
 #%% include SNOWPACK-derived stability indices if requested
 if with_snowpack:
     #% load the SNOWPACK-derived stability indices
-    sno_stab = load_snowpack_stab(reg_codes=reg_codes)
+    sno_stab = load_snowpack_stab(reg_codes=reg_codes, slope_angle=slope_angle, slope_azi=slope_azi,
+                                  elev_suff=elev_suff)
 
 
     #% merge the dataframes
@@ -300,6 +307,11 @@ else:
 # end if else
 
 feats_df = feats_df[sel_feats]
+
+
+#%% in case of the elevation-combined features there will be NaNs in the SNOWPACK data since some of the simulations
+#   did not work; we replace them with zeros
+feats_df.fillna(0, inplace=True)
 
 
 #%% split training and test
@@ -334,6 +346,7 @@ def calc_metrics(n_best, best_path, best_name, splits):
     result["score"] = {}
     result["cr_vals"] = {}
     result["dist_met"] = {}
+    result["dev_from_true_minority_size"] = {}
     for split in splits:
         try:
             test_per = "_".join([str(split[0]), str(split[1])])
@@ -350,6 +363,17 @@ def calc_metrics(n_best, best_path, best_name, splits):
         #% prepare the confusion matrix
         conf_test_all = confusion_matrix(data_dict[test_per][7], pred_test_all_d)
 
+        #% find the minority class
+        class_counts = {k:np.sum(data_dict[test_per][7] == k) for k in np.unique(data_dict[test_per][7])}
+        minority_class = list(class_counts.keys())[np.argmin(list(class_counts.values()))]
+
+        # get the size of the minority class in the predicted values and the true values
+        pred_minority = np.sum(pred_test_all_d == minority_class)
+        true_minority = np.sum(data_dict[test_per][7] == minority_class)
+
+        # calculate the deviation from the true minority class size
+        dev_from_true_minority_size = (pred_minority - true_minority) / true_minority
+
         result["acc"][test_per] = accuracy_score(data_dict[test_per][7], pred_test_all_d)
         result["cr_vals"][test_per] = precision_recall_fscore_support(data_dict[test_per][7], pred_test_all_d)
 
@@ -358,6 +382,7 @@ def calc_metrics(n_best, best_path, best_name, splits):
             result["score"][test_per] = (2*result["metrics"][test_per]["POD"] + result["metrics"][test_per]["PON"] +
                                         (1-result["metrics"][test_per]["FAR"]) + result["metrics"][test_per]["RPC"]) / 5
             result["dist_met"][test_per] = dist_metrics(true_y=data_dict[test_per][7], pred_y=pred_test_all_d)
+            result["dev_from_true_minority_size"][test_per] = dev_from_true_minority_size
         # end if
     # end for split
 
@@ -679,6 +704,7 @@ hss = []
 pss = []
 acc = []
 far = []
+dms = []  # deviation from minority class size
 f1mac = []
 avg_true0 = []
 avg_true1 = []
@@ -696,7 +722,7 @@ for test_per in test_pers:
     tss.append([metrics[i]["metrics"][test_per]["TSS"] for i in np.arange(len(n_bests))])
     hss.append([metrics[i]["metrics"][test_per]["HSS"] for i in np.arange(len(n_bests))])
     pss.append([metrics[i]["metrics"][test_per]["PSS"] for i in np.arange(len(n_bests))])
-
+    dms.append([metrics[i]["dev_from_true_minority_size"][test_per] for i in np.arange(len(n_bests))])
     avg_true0.append([metrics[i]["dist_met"][test_per]["avg_true"]["0"] for i in np.arange(len(n_bests))])
     avg_true1.append([metrics[i]["dist_met"][test_per]["avg_true"]["1"] for i in np.arange(len(n_bests))])
     avg_pred0.append([metrics[i]["dist_met"][test_per]["avg_pred"]["0"] for i in np.arange(len(n_bests))])
@@ -733,6 +759,10 @@ hss_stds = [np.std(hss[:, k]) for k in np.arange(len(n_bests))]
 pss = np.array(pss)
 pss_means = [np.mean(pss[:, k]) for k in np.arange(len(n_bests))]
 pss_stds = [np.std(pss[:, k]) for k in np.arange(len(n_bests))]
+
+dms = np.array(dms)
+dms_means = [np.mean(dms[:, k]) for k in np.arange(len(n_bests))]
+dms_stds = [np.std(dms[:, k]) for k in np.arange(len(n_bests))]
 
 avg_true0 = np.array(avg_true0)
 avg_true0_means = [np.mean(avg_true0[:, k]) for k in np.arange(len(n_bests))]
@@ -805,8 +835,8 @@ ax00 = fig.add_subplot(111)
 ax00.scatter(n_bests, acc_means, facecolor="none", edgecolor="black", marker="o", s=80)
 ax00.errorbar(n_bests, acc_means, yerr=acc_stds, color="black", capsize=5, linestyle="-")
 
-ax00.scatter(n_bests, far_means, facecolor="none", edgecolor="black", marker="o", s=80)
-ax00.errorbar(n_bests, far_means, yerr=far_stds, color="black", capsize=5, linestyle="--")
+ax00.scatter(n_bests, far_means, facecolor="none", edgecolor="red", marker="o", s=80)
+ax00.errorbar(n_bests, far_means, yerr=far_stds, color="red", capsize=5, linestyle="--")
 
 ax00.scatter(n_bests, f1mac_means, facecolor="none", edgecolor="black", marker="o", s=80)
 ax00.errorbar(n_bests, f1mac_means, yerr=f1mac_stds, color="black", capsize=5, linestyle="-.")
@@ -826,7 +856,7 @@ ax00.errorbar(n_bests, wss_means, yerr=wss_stds, color="black", capsize=5)
 """
 
 ax00.plot([], [], c="black", linestyle="-", label="PC")
-ax00.plot([], [], c="black", linestyle="--", label="FAR")
+ax00.plot([], [], c="red", linestyle="--", label="FAR")
 ax00.plot([], [], c="black", linestyle="-.", label="F1-macro")
 ax00.plot([], [], c="black", linestyle=":", label="TSS")
 
@@ -844,9 +874,22 @@ ax00.set_title(f"Scores {a_ps[a_p]} problem")
 
 ax00.set_ylim(0, 1)
 
-pl_path = "/media/kei070/One_Touch/IMPETUS/NORA3/Plots/Model_Evaluation/With_SNOWPACK/WeightedScore_FeatNumTest/"
-# pl.savefig(pl_path + f"WeightedScore_{a_p}_{p_add}.png", dpi=200, bbox_inches="tight")
-pl.savefig(pl_path + f"PC_FAR_F1_TSS_{a_p}.png", dpi=200, bbox_inches="tight")
 pl.show()
 pl.close()
 
+
+#%% plot the deviation from the true minority class size
+fig = pl.figure(figsize=(6, 3))
+ax00 = fig.add_subplot(111)
+
+ax00.scatter(n_bests, dms_means, facecolor="none", edgecolor="black", marker="o", s=80)
+ax00.errorbar(n_bests, dms_means, yerr=dms_stds, color="black", linestyle="-", capsize=5)
+
+ax00.axhline(y=0, c="black", linewidth=0.5)
+
+ax00.set_xlabel("Feature number")
+ax00.set_ylabel("Deviation from minority class size")
+ax00.set_title(f"DMS {a_ps[a_p]} problem")
+
+pl.show()
+pl.close()
