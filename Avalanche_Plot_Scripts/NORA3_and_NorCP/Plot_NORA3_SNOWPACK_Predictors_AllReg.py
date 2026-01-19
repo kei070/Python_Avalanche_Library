@@ -280,11 +280,17 @@ pl.close()
 
 #%% plot some correlation coefficients -- NOW IN PAPER II
 
+lw = 1
+fcol = "none"
+
 # original
 # var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_max_d1", "lwc_max", "RTA_2_d3", "wmax3_emax", "r1_emax"]
 
 # revised
 var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_max_d3", "lwc_max", "RTA_100_d3", "wmax3_emax", "r1_emin"]
+
+# additional
+# var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_i_d1", "snow_depth_d1_emin", "RTA_100_d3", "wmax3_emax", "r1_emin"]
 
 feats_pl = np.array([feats_all[k] for k in var_l])
 
@@ -301,31 +307,40 @@ for reg_code in regions.keys():
 
         sea, col = "winter", "gray"
         dx = -0.2
-        lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # fcol = col if p_ro[reg_code][sea][var] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i+dx, corr_ro[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
-        lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+                     facecolor=fcol, linewidth=lw)
+        # lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+        fcol = col if p_an[reg_code][sea][var] < 0.05 else "none"
         ax00.scatter(i+dx, corr_an[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
 
 
         sea, col = "full", "black"
         dx = 0
-        lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # fcol = col if p_ro[reg_code][sea][var] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i+dx, corr_ro[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
-        lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+        # lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+        fcol = col if p_an[reg_code][sea][var] < 0.05 else "none"
         ax00.scatter(i+dx, corr_an[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
 
         sea, col = "spring", "red"
         dx = 0.2
-        lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # lw = 2.5 if p_ro[reg_code][sea][var] < 0.05 else 1
+        # fcol = col if p_ro[reg_code][sea][var] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i+dx, corr_ro[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
-        lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+                     facecolor=fcol, linewidth=lw)
+        # lw = 2.5 if p_an[reg_code][sea][var] < 0.05 else 1
+        fcol = col if p_an[reg_code][sea][var] < 0.05 else "none"
         ax00.scatter(i+dx, corr_an[reg_code][sea][var], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
     # end for i, var
 # end for reg_code
 
@@ -379,3 +394,4 @@ pl.savefig(pl_path + "/NORA3_Feats_Corr_With_AO.pdf", bbox_inches="tight", dpi=2
 
 pl.show()
 pl.close()
+

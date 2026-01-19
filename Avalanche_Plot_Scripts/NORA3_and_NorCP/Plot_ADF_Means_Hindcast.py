@@ -828,8 +828,9 @@ pl.close()
 
 
 #%% plot the linear trend slopes -- NOW IN PAPER II
-reg_markers = {3009:"o", 3010:"s", 3011:"v", 3012:"^", 3013:"d"}
+lw = 1
 fcol = "none"
+reg_markers = {3009:"o", 3010:"s", 3011:"v", 3012:"^", 3013:"d"}
 
 fig = pl.figure(figsize=(5, 3))
 ax00 = fig.add_subplot(111)
@@ -837,7 +838,7 @@ ax00 = fig.add_subplot(111)
 for reg_code in regions.keys():
 
     # for the legend
-    ax00.scatter([], [], marker=reg_markers[reg_code], edgecolor="black", facecolor="none", label=regions_pl[reg_code])
+    # ax00.scatter([], [], marker=reg_markers[reg_code], edgecolor="black", facecolor="none", label=regions_pl[reg_code])
 
     sea, col = "full", "black"
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
@@ -871,23 +872,39 @@ for i in np.arange(3):
     ax00.axvline(x=i+0.5, c="gray", linewidth=0.5, linestyle=":")
 # end for i
 
-l00 = ax00.legend(ncol=2, fontsize=11, loc=(0.2, 0.01),
+# region legend
+handles1 = []
+for reg_code in [3010, 3011]:
+    p_temp = ax00.scatter([], [], marker=reg_markers[reg_code], edgecolor="black", facecolor="none",
+                          label=regions_pl[reg_code])
+    handles1.append(p_temp)
+# end for reg_code
+handles2 = []
+for reg_code in [3009, 3012, 3013]:
+    p_temp = ax00.scatter([], [], marker=reg_markers[reg_code], edgecolor="black", facecolor="none",
+                          label=regions_pl[reg_code])
+    handles2.append(p_temp)
+# end for reg_code
+l00 = ax00.legend(handles=handles1, ncol=1, fontsize=11, loc=(0.22, 0.01),
                   handletextpad=0.2, labelspacing=0.3, borderpad=0.5, handlelength=1.0, columnspacing=0.5)
+l001 = ax00.legend(handles=handles2, ncol=1, fontsize=11, loc=(0.475, 0.01),
+                   handletextpad=0.2, labelspacing=0.3, borderpad=0.5, handlelength=1.0, columnspacing=0.5)
 
 # for the second legend
 p00 = ax00.scatter([], [], marker="s", c="black", label="full")
 p01 = ax00.scatter([], [], marker="s", c="gray", label="winter")
 p02 = ax00.scatter([], [], marker="s", c="red", label="spring")
-l01 = ax00.legend(handles=[p00, p01], loc=(0.5, 0.86), ncol=2, fontsize=11,
+l01 = ax00.legend(handles=[p00, p02], loc=(0.475, 0.86), ncol=2, fontsize=11,
                   handletextpad=0.2, labelspacing=0.3, borderpad=0.5, handlelength=1.0, columnspacing=0.5)
-ax00.legend(handles=[p02], loc=(0.05, 0.86), ncol=1, fontsize=11,
+ax00.legend(handles=[p01], loc=(0.05, 0.86), ncol=1, fontsize=11,
             handletextpad=0.2, labelspacing=0.3, borderpad=0.5, handlelength=1.0)
 ax00.add_artist(l00)
+ax00.add_artist(l001)
 ax00.add_artist(l01)
 
 ax00.axhline(y=0, c="black", linewidth=0.5)
 
-ax00.set_ylabel("Linear trend in days dec$^{-1}$", fontsize=12)
+ax00.set_ylabel("Linear trend in d dec$^{-1}$", fontsize=12)
 ax00.set_xticks([0, 1, 2, 3])
 ax00.set_xticklabels(["Wind slab", "PWL slab", "Wet", "General"])
 ax00.xaxis.set_tick_params(labelsize=12)
@@ -1024,8 +1041,9 @@ pl.close()
 
 
 #%% plot the AO-ADF correlations, second attempt -- NOW IN PAPER II
-y_lim = (-0.82, 0.82)
 fcol = "none"
+lw = 1
+y_lim = (-0.89, 0.89)
 
 fig = pl.figure(figsize=(6, 4))
 ax00 = fig.add_subplot(121)
@@ -1036,40 +1054,43 @@ for reg_code in regions.keys():
     sea, col = "full", "black"
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
         # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        fcol = col if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
         ax00.scatter(i, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor=fcol, linewidth=lw)
 
         # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        # fcol = col if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
     # end for i, a_p
 
     sea, col = "winter", "gray"
     dx = -0.2
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
         # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        fcol = col if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
         ax00.scatter(i+dx, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
         # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        # fcol = col if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i+dx, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
     # end for i, a_p
 
     sea, col = "spring", "red"
     dx = 0.2
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
         # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        fcol = col if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
         ax00.scatter(i+dx, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
         # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
-        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        # fcol = col if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else "none"
+        fcol = "none"
         ax01.scatter(i+dx, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
     # end for i, a_p
 
 # end for reg_code
@@ -1097,8 +1118,8 @@ ax00.legend(handles=[p001, p002], loc="lower left", fontsize=10.5,  # loc=(0.625
 ax00.add_artist(l00)
 
 # for the second legend
-p00 = ax00.scatter([], [], marker="s", c="black", label="full")
-p01 = ax00.scatter([], [], marker="s", c="gray", label="winter")
+p00 = ax00.scatter([], [], marker="s", c="gray", label="winter")
+p01 = ax00.scatter([], [], marker="s", c="black", label="full")
 p02 = ax00.scatter([], [], marker="s", c="red", label="spring")
 l01 = ax01.legend(handles=[p00, p01, p02], loc="lower right", ncol=1, fontsize=10.5,
                   handletextpad=0.2, labelspacing=0.3, borderpad=0.5, handlelength=1.0, columnspacing=0.5)
@@ -1127,7 +1148,6 @@ pl.savefig(pl_path + "/NORA3_ADF_AO_Corr.pdf", bbox_inches="tight", dpi=200)
 
 pl.show()
 pl.close()
-
 
 
 #%% print the table of linear trends
