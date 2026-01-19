@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Perform a leave-one-out validation of random forest model.
+Perform a k fold cross-validation of the random forest model. (Here it is a "leave-one-winter-out" validation).
+
+
+Maybe we should take this tip from the "Tips on practical use" for decision trees into account:
+    "For classification with few classes, min_samples_leaf=1 is often the best choice."
+(from https://scikit-learn.org/stable/modules/tree.html ) -- NO!!
+
+--> INSTEAD: min_samples_leaf is basically the "finer" tuning tool, i.e., as long as the min_samples_leaf is equal to
+             or larger than min_samples_split, the latter should not have any effect. Thus, we keep min_samples_split at
+             2 (minimum value) and only vary min_samples_leaf
+
 """
 
 
@@ -17,13 +27,13 @@ from ava_functions.Data_Loading import load_snowpack_stab, load_agg_feats_adl
 from ava_functions.Helpers_Load_Data import extract_sea
 from ava_functions.StatMod import stat_mod
 from ava_functions.Model_Fidelity_Metrics import mod_metrics, dist_metrics
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set parameters
 n_best = 0  # set to 0 to use all best features -- this is required to generate a new best features list
 feats = "all"
-a_p = "wind_slab"
+a_p = "y"
 
 class_weight = {0:1, 1:1}
 cw_str = f"CW{'_'.join([str(k).replace('.', 'p') for k in class_weight.values()])}"
@@ -38,7 +48,6 @@ gen_feats_list = True  # set to true if new best features list should be created
 min_samps = [5, 15, 22, 30, 50, 60]
 
 # do not use 2021, 2023 in the model optimisation because they comprise the test data
-# splits = [[2017, 2020], [2019, 2022], [2018, 2024]] #  [2021, 2022], [2023, 2024]]
 splits = [[2018], [2019], [2020], [2022], [2024]]
 
 with_snowpack = True
@@ -53,8 +62,9 @@ ndlev = 2
 reg_code = 0
 agg_type = "mean"
 perc = 75
-h_low = -1
-h_hi = -1
+h_low = -1  # -1 for ElevAgg and -2 for ElevComb
+h_hi = -1  # -1 for ElevAgg and -2 for ElevComb
+elev_suff = "ElevAgg"
 
 a_ps = {"wind_slab":"Wind slab", "pwl_slab":"PWL slab", "wet":"Wet", "y":"General"}
 
@@ -143,6 +153,9 @@ if ((slope_angle == "agg") | (slope_azi == "agg")):
 if ((h_low > -1) & (h_hi > -1)):
     elev_dir = f"/Between{h_low}_and_{h_hi}m/"
     elev_n = f"_Between{h_low}_and_{h_hi}m"
+if ((h_low == -2) & (h_hi == -2)):
+    elev_dir = "/Elev_Comb/"
+    elev_n = ""
 # end if
 
 
@@ -197,13 +210,14 @@ elif feats == "best":
 
 
 #%% load the NORA3-derived features
-feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type, perc=perc)
+feats_n3 = load_agg_feats_adl(ndlev=ndlev, reg_codes=reg_codes, agg_type=agg_type, perc=perc, elev_suff=elev_suff)
 
 
 #%% include SNOWPACK-derived stability indices if requested
 if with_snowpack:
     #% load the SNOWPACK-derived stability indices
-    sno_stab = load_snowpack_stab(reg_codes=reg_codes, slope_angle=slope_angle, slope_azi=slope_azi)
+    sno_stab = load_snowpack_stab(reg_codes=reg_codes, slope_angle=slope_angle, slope_azi=slope_azi,
+                                  elev_suff=elev_suff)
 
 
     #% merge the dataframes
@@ -217,6 +231,11 @@ if with_snowpack:
 else:
     feats_df = feats_n3
 # end if else
+
+
+#%% in case of the elevation-combined features there will be NaNs in the SNOWPACK data since some of the simulations
+#   did not work; we replace them with zeros
+feats_df.fillna(0, inplace=True)
 
 
 #%% add and remove the manually requested features to the selected features
@@ -273,11 +292,24 @@ def calc_metrics(test_per, data_dict, ndlev, class_weight, hypp_set):
     #% prepare the confusion matrix
     conf_test_all = confusion_matrix(test_y_all, pred_test_all)
 
+
+    #% find the minority class
+    class_counts = {k:np.sum(test_y_all == k) for k in np.unique(test_y_all)}
+    minority_class = list(class_counts.keys())[np.argmin(list(class_counts.values()))]
+
+    # get the size of the minority class in the predicted values and the true values
+    pred_minority = np.sum(pred_test_all == minority_class)
+    true_minority = np.sum(test_y_all == minority_class)
+
+    # calculate the deviation from the true minority class size
+    dev_from_true_minority_size = (pred_minority - true_minority) / true_minority
+
     if ndlev == 2:
         result["metrics"] = mod_metrics(conf_test_all)
         result["score"] = (2*result["metrics"]["POD"] + result["metrics"]["PON"] + 2*(1-result["metrics"]["FAR"]) +
                            result["metrics"]["RPC"]) / 6
         result["dist_met"] = dist_metrics(true_y=test_y_all, pred_y=pred_test_all)
+        result["dev_from_true_minority_size"] = dev_from_true_minority_size
     # end if
 
     return result
@@ -299,7 +331,7 @@ for max_depth in max_depths:
             hypp_set = {'n_estimators':n_estimator,  # [100, 200, 300],
                         'max_depth':max_depth,  # [2, 5, 8, 11, 14, 17, 20],
                         'min_samples_leaf':min_samp,
-                        'min_samples_split':2,
+                        'min_samples_split':2,  # see the reasoning in the introductory text above
                         'max_features':"sqrt",
                         'bootstrap':True
                         }
@@ -383,8 +415,8 @@ if len(splits) == 4:
     ax10.set_ylabel("Metric")
     # ax10.set_xlabel("min_sample_leaf & _split")
     # ax11.set_xlabel("min_sample_leaf & _split")
-    ax10.set_xlabel("MSL")
-    ax11.set_xlabel("MSL")
+    ax10.set_xlabel("MSL & MSS")
+    ax11.set_xlabel("MSL & MSS")
 
     ax00.set_ylim(0, 1)
     ax01.set_ylim(0, 1)
@@ -394,10 +426,10 @@ if len(splits) == 4:
     fig.suptitle(a_ps[a_p] + " problem")
     fig.subplots_adjust(wspace=0.1)
 
-    pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+    # pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
     cw_str = "_".join([str(k).replace(".", "p") for k in class_weight.values()])
     feats_str = f"{n_best}_{feats}Feats" if feats == "best" else f"{feats}Feats"
-    pl.savefig(pl_path + f"Scores_AllSeasons_{a_p}_{feats_str}_CW{cw_str}.pdf", bbox_inches="tight", dpi=200)
+    # pl.savefig(pl_path + f"Scores_AllSeasons_{a_p}_{feats_str}_CW{cw_str}.pdf", bbox_inches="tight", dpi=200)
 
     pl.show()
     pl.close()
@@ -449,9 +481,9 @@ if len(splits) == 3:
     ax01.legend(ncol=1)
     ax02.legend(ncol=1)
 
-    ax00.set_xlabel("MSL")
-    ax01.set_xlabel("MSL")
-    ax02.set_xlabel("MSL")
+    ax00.set_xlabel("MSL & MSS")
+    ax01.set_xlabel("MSL & MSS")
+    ax02.set_xlabel("MSL & MSS")
 
     ax01.set_yticklabels([])
     ax02.set_yticklabels([])
@@ -483,6 +515,7 @@ for max_depth in max_depths:
         pss = []
         acc = []
         far = []
+        dms = []  # deviation from minority class size
         recall0 = []
         precis0 = []
         recall1 = []
@@ -509,6 +542,8 @@ for max_depth in max_depths:
 
             acc.append([min_samp_dict[max_depth][n_estimator][min_samp][0][j]["acc_test"] for min_samp in min_samps])
             wss.append([min_samp_dict[max_depth][n_estimator][min_samp][0][j]["score"] for min_samp in min_samps])
+            dms.append([min_samp_dict[max_depth][n_estimator][min_samp][0][j]["dev_from_true_minority_size"] for
+                        min_samp in min_samps])
             tss.append([min_samp_dict[max_depth][n_estimator][min_samp][0][j]["metrics"]["TSS"] for min_samp in
                                                                                                              min_samps])
             hss.append([min_samp_dict[max_depth][n_estimator][min_samp][0][j]["metrics"]["HSS"] for min_samp in
@@ -551,8 +586,8 @@ for max_depth in max_depths:
         far = np.array(far)
         far_means = [np.mean(far[:, k]) for k in np.arange(len(min_samps))]
         far_stds = [np.std(far[:, k]) for k in np.arange(len(min_samps))]
-        ax00.scatter(min_samps, far_means, facecolor="none", edgecolor="black", marker="o", s=80)
-        ax00.errorbar(min_samps, far_means, yerr=far_stds, color="black", linestyle="--", capsize=5)
+        ax00.scatter(min_samps, far_means, facecolor="none", edgecolor="red", marker="o", s=80)
+        ax00.errorbar(min_samps, far_means, yerr=far_stds, color="red", linestyle="--", capsize=5)
 
         f1mac = np.array(f1mac)
         f1mac_means = [np.mean(f1mac[:, k]) for k in np.arange(len(min_samps))]
@@ -566,8 +601,13 @@ for max_depth in max_depths:
         ax00.scatter(min_samps, tss_means, facecolor="none", edgecolor="black", marker="o", s=80)
         ax00.errorbar(min_samps, tss_means, yerr=tss_stds, color="black", linestyle=":", capsize=5)
 
-
         """
+        dms = np.array(dms)
+        dms_means = [np.mean(dms[:, k]) for k in np.arange(len(min_samps))]
+        dms_stds = [np.std(dms[:, k]) for k in np.arange(len(min_samps))]
+        ax00.scatter(min_samps, dms_means, facecolor="none", edgecolor="red", marker="o", s=80)
+        ax00.errorbar(min_samps, dms_means, yerr=dms_stds, color="red", linestyle="-", capsize=5)
+
         wss = np.array(wss)
         means = [np.mean(wss[:, k]) for k in np.arange(len(min_samps))]
         stds = [np.std(wss[:, k]) for k in np.arange(len(min_samps))]
@@ -631,10 +671,26 @@ if len(max_depths) != len(n_estimators):
     p_add += str(max_depths[0]) if len(max_depths) < len(n_estimators) else str(n_estimators[0])
 # end if
 
-pl_path = f"{obs_path}/IMPETUS/NORA3/Plots/Model_Evaluation/With_SNOWPACK/WeightedScore_HyppTest/"
-# pl.savefig(pl_path + f"WeightedScore_{a_p}_{p_add}.png", dpi=200, bbox_inches="tight")
-pl.savefig(pl_path + f"WSS_TSS_HSS_PSS_{a_p}.png", dpi=200, bbox_inches="tight")
-pl.savefig(pl_path + f"WSS_TSS_HSS_PSS_{a_p}.pdf", dpi=200, bbox_inches="tight")
+pl.show()
+pl.close()
+
+
+#%% plot the deviation from the true minority class size
+dms = np.array(dms)
+dms_means = [np.mean(dms[:, k]) for k in np.arange(len(min_samps))]
+dms_stds = [np.std(dms[:, k]) for k in np.arange(len(min_samps))]
+
+fig = pl.figure(figsize=(6, 3))
+ax00 = fig.add_subplot(111)
+
+ax00.scatter(min_samps, dms_means, facecolor="none", edgecolor="black", marker="o", s=80)
+ax00.errorbar(min_samps, dms_means, yerr=dms_stds, color="black", linestyle="-", capsize=5)
+
+ax00.axhline(y=0, c="black", linewidth=0.5)
+
+ax00.set_xlabel("MSL")
+ax00.set_ylabel("Deviation from minority class size")
+ax00.set_title(f"DMS {a_ps[a_p]} problem")
 
 pl.show()
 pl.close()
