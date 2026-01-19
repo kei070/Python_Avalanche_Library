@@ -486,13 +486,13 @@ pl.close()
 var1 = "s7_emin"
 var1_pl = feats_all[var1]
 var1_u = "\nin mm"
-var2 = "RTA_2_d3"
+var2 = "RTA_100_d3"
 var2_pl = feats_all[var2]
 var2_u = ""
 var3 = "t_max_emax"
 var3_pl = feats_all[var3]
 var3_u = "\nin K"
-var4 = "lwc_max_d2"
+var4 = "lwc_max_d3"
 var4_pl = feats_all[var4]
 var4_u = "\nin %"
 var5 = "snow_depth_emin"

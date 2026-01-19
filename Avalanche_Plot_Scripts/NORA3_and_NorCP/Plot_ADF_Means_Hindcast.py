@@ -829,6 +829,7 @@ pl.close()
 
 #%% plot the linear trend slopes -- NOW IN PAPER II
 reg_markers = {3009:"o", 3010:"s", 3011:"v", 3012:"^", 3013:"d"}
+fcol = "none"
 
 fig = pl.figure(figsize=(5, 3))
 ax00 = fig.add_subplot(111)
@@ -840,24 +841,27 @@ for reg_code in regions.keys():
 
     sea, col = "full", "black"
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
-        ax00.scatter(i, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor="none",
+        # lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        ax00.scatter(i, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor=fcol,
                      linewidth=lw)
     # end for i, a_p
 
     sea, col = "winter", "gray"
     dx = -0.1
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
-        ax00.scatter(i+dx, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor="none",
+        # lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        ax00.scatter(i+dx, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor=fcol,
                      linewidth=lw)
     # end for i, a_p
 
     sea, col = "spring", "red"
     dx = 0.1
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
-        ax00.scatter(i+dx, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor="none",
+        # lw = 2.5 if lr_p[sea][reg_code][a_p] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
+        ax00.scatter(i+dx, lr_s[sea][reg_code][a_p]*10, marker=reg_markers[reg_code], edgecolor=col, facecolor=fcol,
                      linewidth=lw)
     # end for i, a_p
 
@@ -1021,6 +1025,7 @@ pl.close()
 
 #%% plot the AO-ADF correlations, second attempt -- NOW IN PAPER II
 y_lim = (-0.82, 0.82)
+fcol = "none"
 
 fig = pl.figure(figsize=(6, 4))
 ax00 = fig.add_subplot(121)
@@ -1030,11 +1035,13 @@ for reg_code in regions.keys():
 
     sea, col = "full", "black"
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax00.scatter(i, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
-                     facecolor="none", linewidth=lw)
+                     facecolor=fcol, linewidth=lw)
 
-        lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax01.scatter(i, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
     # end for i, a_p
@@ -1042,10 +1049,12 @@ for reg_code in regions.keys():
     sea, col = "winter", "gray"
     dx = -0.2
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax00.scatter(i+dx, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
-        lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax01.scatter(i+dx, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
     # end for i, a_p
@@ -1053,10 +1062,12 @@ for reg_code in regions.keys():
     sea, col = "spring", "red"
     dx = 0.2
     for i, a_p in enumerate(["wind_slab", "pwl_slab", "wet", "y"]):
-        lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax00.scatter(i+dx, ao_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
-        lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        # lw = 2.5 if ao_ro_ll_p_d[reg_code][a_p][sea][0] < 0.05 else 1
+        fcol = col if lr_p[sea][reg_code][a_p] < 0.05 else "none"
         ax01.scatter(i+dx, ao_ro_ll_corr_d[reg_code][a_p][sea][0], marker=reg_markers[reg_code], edgecolor=col,
                      facecolor="none", linewidth=lw)
     # end for i, a_p

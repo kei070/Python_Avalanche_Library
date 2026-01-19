@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+SENSITIVITY ANALYSIS FOR RF MODEL UNCERTAINTY
+
 Plot a multi-panel confusion matrix plot for the different avalanche problems.
+---> One multi-panel plot per random forest model.
 """
 
 #%% imports
@@ -14,58 +17,8 @@ from matplotlib import gridspec
 
 from ava_functions.Model_Fidelity_Metrics import mod_metrics
 from ava_functions.ConfMat_Helper import conf_helper
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 from ava_functions.Lists_and_Dictionaries.Features import feats_all
-
-
-#%% set a dictionary for the feature names
-"""
-feats_m = {'t_mean':"t1", 't_max':"tmax", 't_min':"tmin", 't_range':"dtr",
-               'ftc':"ftc",
-               't3':"t3", 't7':"t7",
-               'tmax3':'tmax3', 'tmax7':'tmax7',
-               'dtemp1':'dtr1', 'dtemp2':'dtr2', 'dtemp3':'dtr3',
-               'dtempd1':'dtrd1', 'dtempd2':'dtrd2', 'dtempd3':'dtrd3',
-               'pdd':"pdd",
-               'ws_mean':"w1", 'ws_max':"wmax", 'ws_min':"wmin", "ws_range":"dws",
-               "dws1":"dws1", "dws2":"dws2", "dws3":"dws3",
-               "dwsd1":"dwsd1", "dwsd2":"dwsd2", "dwsd3":"dwsd3",
-               'wind_direction':"w_dir", "dwdir":"dwdir",
-               "dwdir1":"dwdir1", "dwdir2":"dwdir2", "dwdir3":"dwdir3",
-               'w3':"w3",
-               'wmax3':'wmax3', 'wmax7':'wmax7',
-               'total_prec_sum':"Ptot",
-               's1':'s1', 'r1':'r1',
-               'r3':'r3', 'r7':'r7',
-               's3':'s3', 's7':'s7',
-               'wdrift':'wdrift', 'wdrift_3':'wdrift_3',
-               'wdrift3':'wdrift3', 'wdrift3_3':'wdrift3_3',
-               'RH':"rh",
-               'NLW':"nlw", 'NSW':"nsw",
-               'RH3':"rh3", 'RH7':"rh7",
-               'NLW3':"nlw3", 'NLW7':"nlw7",
-               'NSW3':"nsw3", 'NSW7':"nsw7",
-               "ava_clim":"aci"}
-
-
-feats_sp = {"snow_depth":"SD1", "snow_depth3":"SD3", "snow_depth7":"SD7",
-            "t_top":"t_top",
-            "lwc_i":"lwc_i", "lwc_max":"lwc_max", "lwc_sum":"lwc_sum", "lwc_s_top":"lwc_s_top",
-            "RTA_100":"SSI_100", "RTA_2":"SSI_2",
-            "Sk38_100":"Sk38_100", "Sk38_2":"Sk38_2",
-            "Sn38_100":"Sn38_100", "Sn38_2":"Sn38_2"}
-
-feats_sp = {**feats_sp, **{k + "_d1":feats_sp[k] + "_d1" for k in feats_sp.keys()},
-            **{k + "_d2":feats_sp[k] + "_d2" for k in feats_sp.keys()},
-            **{k + "_d3":feats_sp[k] + "_d3" for k in feats_sp.keys()}}
-
-feats_m = {**feats_m, **feats_sp}
-
-feats_emin = {k + "_emin":feats_m[k] + "_emin" for k in feats_m.keys()}
-feats_emax = {k + "_emax":feats_m[k] + "_emax" for k in feats_m.keys()}
-
-feats_all = {**feats_m, **feats_emin, **feats_emax}
-"""
 
 #%% set some parameters
 model_ty = "RF"
@@ -74,6 +27,9 @@ sea = "full"
 agg_type = "mean"
 perc = 0
 with_snowpack = True
+
+test_yrs = "21_23"
+test_yrs_str = f"wo_{test_yrs}"
 
 
 #%% generate a name prefix/suffix depending on the gridcell aggregation
@@ -95,30 +51,32 @@ else:
 
 
 #%% set paths
-mod_path = f"{path_par}/IMPETUS/NORA3/Stored_Models/{agg_str}/Elev_Agg/"
+mod_path = f"{path_par}/IMPETUS/NORA3/Stored_Models/{agg_str}/Elev_Agg/00_Final/{test_yrs_str}/"
+pl_path = f"{path_par}/IMPETUS/NORA3/Stored_Models/Mean/Elev_Agg/00_Final/Plots/"
 
 
 #%% generate the model names
-# win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SVMSMOTE_20best_wind_slab{sp_str}_wData.joblib"
-# pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_ADASYN_10best_pwl_slab{sp_str}_wData.joblib"
-# wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SVMSMOTE_30best_wet{sp_str}_wData.joblib"
-# adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SVMSMOTE_20best_general{sp_str}_wData.joblib"
-# win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_wind_slab{sp_str}_wData.joblib"
-# pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_15best_pwl_slab{sp_str}_wData.joblib"
-# wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_15best_wet{sp_str}_wData.joblib"
-# adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_general{sp_str}_wData.joblib"
-
-"""
-win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_wind_slab{sp_str}_wData.joblib"
-pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_pwl_slab{sp_str}_wData.joblib"
-wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_35best_CW1_1_wet{sp_str}_wData.joblib"
-adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_general{sp_str}_wData.joblib"
-"""
-
-win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_20best_CW1_1_wind_slab{sp_str}_wData.joblib"
-pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_50best_CW1_1_pwl_slab{sp_str}_wData.joblib"
-wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_50best_CW1_1_wet{sp_str}_wData.joblib"
-adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_15best_CW1_1_general{sp_str}_wData.joblib"
+if test_yrs == "21_23":
+    win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_20best_CW1_1_wind_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_20best_CW1_1_pwl_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_35best_CW1_1_wet{sp_str}_wData_{test_yrs_str}.joblib"
+    adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_40best_CW1_1_general{sp_str}_wData_{test_yrs_str}.joblib"
+elif test_yrs == "18_22":
+    win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_60best_CW1_1_wind_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_40best_CW1_1_pwl_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_40best_CW1_1_wet{sp_str}_wData_{test_yrs_str}.joblib"
+    adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_general{sp_str}_wData_{test_yrs_str}.joblib"
+elif test_yrs == "19_24":
+    win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_40best_CW1_1_wind_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_60best_CW1_1_pwl_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_35best_CW1_1_wet{sp_str}_wData_{test_yrs_str}.joblib"
+    adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_60best_CW1_1_general{sp_str}_wData_{test_yrs_str}.joblib"
+elif test_yrs == "20_22":
+    win_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_50best_CW1_1_wind_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    pwl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_pwl_slab{sp_str}_wData_{test_yrs_str}.joblib"
+    wet_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_wet{sp_str}_wData_{test_yrs_str}.joblib"
+    adl_name = f"{model_ty}_{ndlev}DL_AllReg_{agg_str}_{sea}_SMOTE_30best_CW1_1_general{sp_str}_wData_{test_yrs_str}.joblib"
+# end if elif
 
 
 #%% load the models
@@ -179,19 +137,19 @@ hm10 = sns.heatmap(wet_conf_dat, annot=wet_labels, fmt="", cmap="Blues", ax=ax10
 hm11 = sns.heatmap(adl_conf_dat, annot=adl_labels, fmt="", cmap="Blues", ax=ax11, vmin=vmin, vmax=vmax, cbar=True,
                    cbar_ax=ax_cbar)
 
-ax00.set_xlabel("Predicted danger")
-ax00.set_ylabel("True danger")
+ax00.set_xlabel("Predicted")
+ax00.set_ylabel("True")
 ax00.set_title("(a) Wind slab")
 
-ax01.set_xlabel("Predicted danger")
+ax01.set_xlabel("Predicted")
 # ax01.set_ylabel("True danger")
 ax01.set_title("(b) PWL slab")
 
-ax10.set_xlabel("Predicted danger")
-ax10.set_ylabel("True danger")
+ax10.set_xlabel("Predicted")
+ax10.set_ylabel("True")
 ax10.set_title("(c) Wet")
 
-ax11.set_xlabel("Predicted danger")
+ax11.set_xlabel("Predicted")
 # ax11.set_ylabel("True danger")
 ax11.set_title("(d) General")
 
@@ -218,8 +176,8 @@ ax11.set_yticklabels(["", ""])
 
 fig.subplots_adjust(wspace=0.4, hspace=0.7)
 
-pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
-pl.savefig(pl_path + "ConfMats_AllProblems.pdf", bbox_inches="tight", dpi=200)
+# pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+pl.savefig(pl_path + f"ConfMats_AllProblems_{test_yrs_str}.pdf", bbox_inches="tight", dpi=200)
 
 pl.show()
 pl.close()
@@ -306,8 +264,8 @@ ax11.set_xlim(0, x_max)
 
 fig.subplots_adjust(wspace=0.75, hspace=0.04)
 
-pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
-pl.savefig(pl_path + "Importances_AllProblems.pdf", bbox_inches="tight", dpi=200)
+# pl_path = "/home/kei070/Documents/IMPETUS/Publishing/The Cryosphere/Avalanche_Paper_2/00_Figures/"
+pl.savefig(pl_path + f"Importances_AllProblems_{test_yrs_str}.pdf", bbox_inches="tight", dpi=200)
 
 pl.show()
 pl.close()

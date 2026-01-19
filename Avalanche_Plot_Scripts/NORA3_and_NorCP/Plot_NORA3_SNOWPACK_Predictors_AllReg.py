@@ -279,7 +279,12 @@ pl.close()
 
 
 #%% plot some correlation coefficients -- NOW IN PAPER II
-var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_max_d1", "lwc_max", "RTA_2_d3", "wmax3_emax", "r1_emax"]
+
+# original
+# var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_max_d1", "lwc_max", "RTA_2_d3", "wmax3_emax", "r1_emax"]
+
+# revised
+var_l = ["s7_emin", "s3_emax", "t_max_emax", "lwc_max_d3", "lwc_max", "RTA_100_d3", "wmax3_emax", "r1_emin"]
 
 feats_pl = np.array([feats_all[k] for k in var_l])
 
