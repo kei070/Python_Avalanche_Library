@@ -636,41 +636,6 @@ pl.close()
 #### ----------------------------------- #####
 
 
-#%% test the significance of the change using a Monte-Carlo test
-"""
-a_p = "wet"
-p_hist_45_mc = monte_carlo_p2(adf_dict[reg_code]["adf"]["historical"][a_p][sea][1].DL,
-                              adf_dict[reg_code]["adf"]["rcp45_MC"][a_p][sea][1].DL, num_permutations=100000)
-p_45_mc_lc = monte_carlo_p2(adf_dict[reg_code]["adf"]["rcp45_MC"][a_p][sea][1].DL,
-                            adf_dict[reg_code]["adf"]["rcp45_LC"][a_p][sea][1].DL, num_permutations=100000)
-p_hist_45_lc = monte_carlo_p2(adf_dict[reg_code]["adf"]["historical"][a_p][sea][1].DL,
-                              adf_dict[reg_code]["adf"]["rcp45_LC"][a_p][sea][1].DL, num_permutations=100000)
-p_hist_85_mc = monte_carlo_p2(adf_dict[reg_code]["adf"]["historical"][a_p][sea][1].DL,
-                              adf_dict[reg_code]["adf"]["rcp85_MC"][a_p][sea][1].DL, num_permutations=100000)
-p_85_mc_lc = monte_carlo_p2(adf_dict[reg_code]["adf"]["rcp85_MC"][a_p][sea][1].DL,
-                            adf_dict[reg_code]["adf"]["rcp85_LC"][a_p][sea][1].DL, num_permutations=100000)
-p_hist_85_lc = monte_carlo_p2(adf_dict[reg_code]["adf"]["historical"][a_p][sea][1].DL,
-                              adf_dict[reg_code]["adf"]["rcp85_LC"][a_p][sea][1].DL, num_permutations=100000)
-
-"""
-#% print a table
-# print(f"""
-#       p values
-#       {a_p} ADF change {regions_pl[reg_code]}
-
-#       RCP4.5
-#       hist-MC {p_hist_45_mc:.4f}
-#       MC-LC   {p_45_mc_lc:.4f}
-#       hist-LC {p_hist_45_lc:.4f}
-
-#       RCP8.5
-#       hist-MC {p_hist_85_mc:.4f}
-#       MC-LC   {p_85_mc_lc:.4f}
-#       hist-LC {p_hist_85_lc:.4f}
-
-#       """)
-
-
 #%% create a mask for the upper triangle, including the diagonal
 d_adf = np.zeros((5, 5))
 mask = np.triu(np.ones_like(d_adf, dtype=bool))
@@ -681,31 +646,6 @@ gray_mask[mask] = 1
 gray_mask[4, 1] = 2
 gray_mask[3, 2] = 2
 gray_mask = gray_mask.flatten()[gray_mask.flatten() != 1]
-
-
-#%% test if the late-century wind slab ADF is significantly different from zero
-a_p = "wind_slab"
-sea = "full"
-diff_zero_ws = {}
-for reg_code in regions.keys():
-    diff_zero_ws[reg_code] = monte_carlo_p(adf_dict[reg_code]["adf"]["rcp85_LC"][a_p][sea][1].DL,
-                                           np.array([0]), num_permutations=10000)
-# end for reg_code
-
-a_p = "pwl_slab"
-sea = "full"
-diff_zero_pwl = {}
-for reg_code in regions.keys():
-    diff_zero_pwl[reg_code] = monte_carlo_p(adf_dict[reg_code]["adf"]["rcp85_LC"][a_p][sea][1].DL,
-                                            np.array([0]), num_permutations=10000)
-# end for reg_code
-
-
-print("p values wind slab:")
-print(diff_zero_ws)
-
-print("p values PWL slab:")
-print(diff_zero_pwl)
 
 
 #%% set up a heat map with the changes
