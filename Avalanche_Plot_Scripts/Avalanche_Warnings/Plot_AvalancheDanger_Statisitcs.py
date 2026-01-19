@@ -104,31 +104,41 @@ for ap in list(ap_df_reg.columns):
 # end for ap
 
 
-#%% plot
-aps_pl = ["Glide\nslab", "New\nloose", "New\nslab", "PWL\nslab", "Wet\nloose", "Wet\nslab", "Wind\nslab", "Wet",
+#%% reorder
+ordered_aps = ["glide_slab", "new_loose", "new_slab", "wet_slab", "wet_loose", "wet", "pwl_slab", "wind_slab",
+               "danger_level"]
+ord_ap_freq = [ap_freq["total"][k] for k  in ordered_aps]
+ord_avg_dl = [avg_dl["total"][k] for k in ordered_aps]
+
+
+#%% plot  --  revised version
+aps_pl = ["Glide\nslab", "New\nloose", "New\nslab", "Wet\nslab", "Wet\nloose", "Wet", "PWL\nslab", "Wind\nslab",
           "ADL"]
 
 fig = pl.figure(figsize=(4, 3))
 ax0 = fig.add_subplot(111)
 ax1 = ax0.twinx()  # fig.add_subplot(212)
 
-p00, = ax0.plot(np.arange(len(ap_freq["total"].keys())), ap_freq["total"].values(), marker="o", c="black",
-                linewidth=0.25, label="# of days")
-p01, = ax1.plot(np.arange(len(ap_freq["total"].keys())), avg_dl["total"].values(), marker="s", c="red", linewidth=0.25,
+p00, = ax0.plot(np.arange(len(ord_avg_dl)), ord_avg_dl, marker="s", c="red", linewidth=0.25,
                 label="Average DL")
+p01, = ax1.plot(np.arange(len(ord_ap_freq)), ord_ap_freq, marker="o", c="black",
+                linewidth=0.25, label="# of days")
 
-ax0.legend(handles=[p00, p01])
+ax1.axhline(y=0, c="black", linewidth=0.5)
 
-ax0.set_ylabel("Number of days")
-ax1.set_ylabel("Average danger level", color="red")
+ax1.legend(handles=[p00, p01], loc="lower right")
+
+ax0.set_ylabel("Average danger level", color="red")
+ax1.set_ylabel("Number of days")
+
 
 # ax0.set_xticklabels([])
-ax0.set_xticks(np.arange(len(ap_freq["total"].keys())))
-ax0.set_xticklabels(aps_pl)
+ax1.set_xticks(np.arange(len(ap_freq["total"].keys())))
+ax1.set_xticklabels(aps_pl)
 
-ax0.spines['right'].set_color('red')
-ax1.spines['right'].set_color('red')
-ax1.tick_params(axis='y', colors='red')
+ax0.spines['left'].set_color('red')
+ax1.spines['left'].set_color('red')
+ax0.tick_params(axis='y', colors='red')
 
 ax0.set_title("Avalanche danger level statistics")
 
