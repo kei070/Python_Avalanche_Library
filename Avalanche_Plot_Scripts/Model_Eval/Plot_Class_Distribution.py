@@ -6,16 +6,10 @@ Plot the class distribution used in RF model training.
 
 #%% imports
 import numpy as np
-import seaborn as sns
 import pylab as pl
 from joblib import load
-from sklearn.metrics import accuracy_score, confusion_matrix
-from matplotlib import gridspec
 
-from ava_functions.Model_Fidelity_Metrics import mod_metrics
-from ava_functions.ConfMat_Helper import conf_helper
-from ava_functions.Lists_and_Dictionaries.Paths import path_par, obs_path
-from ava_functions.Lists_and_Dictionaries.Features import feats_all
+from ava_functions.Lists_and_Dictionaries.Paths import path_par
 
 
 #%% set some parameters
@@ -47,7 +41,7 @@ else:
 
 #%% set paths
 mod_path = f"{path_par}/IMPETUS/NORA3/Stored_Models/{agg_str}/Elev_Agg/"
-pl_path = f"{obs_path}/IMPETUS/Publishing/The Cryosphere/Supplementary_Paper_2_Rev1/Figures/"
+pl_path = f"{path_par}/IMPETUS/NORA3/Stored_Models/{agg_str}/Elev_Agg/00_Final/Plots/"
 
 
 #%% generate the model names
