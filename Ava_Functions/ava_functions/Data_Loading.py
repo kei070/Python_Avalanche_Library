@@ -28,9 +28,17 @@ from .DatetimeSimple import date_dt
 
 
 # function for loading the aggregated features for NORA3 WITH ADLs
-def load_agg_feats_adl(path=path_par, reg_codes=3009, features=slice(None), ndlev=4, agg_type="mean", perc=90):
+def load_agg_feats_adl(path=path_par, reg_codes=3009, features=slice(None), ndlev=4, agg_type="mean", perc=90,
+                       elev_suff="ElevAgg"):
     """
     Brief simple function for loading the predictive features for avalanche danger forecasting including the ADLs.
+
+    Parameters:
+
+        agg_type: String. The method used to spatially aggregate the features. Choices are "mean" (default) and "perc".
+                          For "perc", the parameter perc determines the percentile.
+        elev_suff: String. The suffix indicating how the features are aggregated/combined across elevation levels. The
+                           choices are "ElevAgg" (default) and "ElevComb".
     """
 
     # make sure that the percentile is 0 if the type is not percentile
@@ -50,7 +58,7 @@ def load_agg_feats_adl(path=path_par, reg_codes=3009, features=slice(None), ndle
 
         # set file name
         fn = f"/IMPETUS/NORA3/Avalanche_Predictors_{ndlev}Level/{agg_str}/" + \
-                                       f"Features_{ndlev}Level_All_{agg_str}_ElevAgg_{reg_code}_{regions[reg_code]}.csv"
+                                   f"Features_{ndlev}Level_All_{agg_str}_{elev_suff}_{reg_code}_{regions[reg_code]}.csv"
 
         # load file
         feats_df = pd.read_csv(path+fn, index_col=0, parse_dates=True)[features]
@@ -250,10 +258,11 @@ def load_features2(path=path_par, ndlev=4, reg_codes=3009, h_low=400, h_hi=900,
 
 
 # function for loading the SNOWPACK-derived stability indices for NORA3
-def load_snowpack_stab(path=path_par, reg_codes=3009, slope_angle="agg", slope_azi="agg", verbose=True):
+def load_snowpack_stab(path=path_par, reg_codes=3009, slope_angle="agg", slope_azi="agg", elev_suff="ElevAgg",
+                       verbose=True):
 
     # generate the strings based on slope and aspect
-    slope_n = "ElevAgg"
+    slope_n = elev_suff
     slope_path = "Flat"
     if ((slope_angle == "agg") | (slope_azi == "agg")):
         slope_n = "ElevSlopeAgg"

@@ -91,10 +91,8 @@ def stat_mod(model_ty="RF", ndlev=2, hyperp={}, grid_search=False, grid_sample=0
         cv           Integer. The number of folds in the gridsearch crossvalidation. Defaults to 5.
         cv_score     String or score object. The score to be used in the cross-validation. For possible choices see
                                              https://scikit-learn.org/stable/modules/model_evaluation.html
-        balance_meth String. The method used for balancing the data when loading the predictors. Note that this does
-                             not control what is happening during the model training, which is controlled by the
-                             balancing parameter. If balancing is set to none or internal, the balance_meth parameter
-                             becomes irrelevant.
+        balance_meth String. ONLY USED DURING GRID SEARCH!
+                             The method used for balancing the data during the grid search.
                              Choices are the following:
                                -undersample: uses the custom undersample function
                                -SMOTE: uses the synthetic minority oversampling method from the imbalanced-learn library
@@ -113,11 +111,15 @@ def stat_mod(model_ty="RF", ndlev=2, hyperp={}, grid_search=False, grid_sample=0
     """
 
     # set the hyperparameters
-    if cv_type == "seasonal":
-        pipe = True
+    if grid_search:
+        if cv_type == "seasonal":
+            pipe = True
+        else:
+            pipe = True
+        # end if
     else:
-        pipe = True
-    # end if
+        pipe = False
+    # end if else
 
     if grid_sample > 0:
         hy_ndlev = 0
@@ -197,7 +199,7 @@ def stat_mod(model_ty="RF", ndlev=2, hyperp={}, grid_search=False, grid_sample=0
 
     # print the hyperparameters
     if verbose:
-        print("\nThe following set/gird of hyperparameters is used:")
+        print("\nThe following set/grid of hyperparameters is used:")
         print(hyperparameters)
         print()
     # end if

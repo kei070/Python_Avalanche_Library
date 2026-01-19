@@ -7,9 +7,30 @@ Helper functions for running SNOWPACK; partly based on functions provided via AW
 # imports
 import os
 import numpy as np
+import pandas as pd
 from datetime import datetime
 from awsmet import SMETParser
 from snowpacktools.snowpro import pro_helper, pro_plotter
+from snowpacktools.snowpro.snowpro import _parse_date_like
+
+
+# estimate the number of lines in a .txt-like file
+def estimate_lines(data_path, chunk_size=1024*1024):
+    line_count = 0
+    with open(data_path, "rb") as f:
+        while chunk := f.read(chunk_size):
+            line_count += chunk.count(b'\n')
+    # end with
+    return line_count
+# end def
+
+
+# count the number of lines in a .txt-like file
+def count_lines(data_path):
+    with open(data_path, "r") as f:
+        return sum(1 for _ in f)
+    # end with
+# end def
 
 
 #% load only requested lines of a text file (or a .pro file for SNOWPACK output)
@@ -18,7 +39,9 @@ def load_lines(data_path, start, end):
     Start and end inclusive!
     """
     read_lines = []
+
     with open(data_path, "r") as f:
+
         for i, line in enumerate(f):
             if i > end:
                 break
@@ -36,16 +59,23 @@ def load_lines(data_path, start, end):
 #% specifically for the .pro SNOWPACK output: find the last line with a starting day
 def find_last_line(lines):
     """
-    The last line must be the line before a line including a data and time 0:00:00
+    The last line must be the line before a line including data and time 0:00:00 or an empty line (eof).
     """
+
     for i, l in enumerate(lines[::-1]):
-        if (l[:4] == "0500") & (l[-8:] == "00:00:00"):
+        if ((l[:4] == "0500") & (l[-8:] == "00:00:00")):
             # print(l, i)
             break
-        # end if
     # end for i
 
-    return len(lines)-i-1
+    # if the found line is the FIRST line in the file, this means that we have reached the end of the file and the last
+    # line in lines should be the last line of the file anyway --> take the last line of the file as the last line
+    if l == lines[0]:
+        print("\nReached end of file (presumably: l = line[0]).\n")
+        return len(lines)
+    else:
+        return len(lines)-i-1
+    # end if else
 # end def
 
 
@@ -65,7 +95,7 @@ def load_pro_header(data_path):
 # end def
 
 
-#% load lines with header; also cuts the lines at the last line found with the last line function and return that line
+#% load lines with header; also cuts the lines at the last line found with the last line function and returns that line
 def load_lines_whead(data_path, start, end):
 
     # load the header
@@ -86,7 +116,7 @@ def load_lines_whead(data_path, start, end):
 # end def
 
 
-# and adjusted read_pro function taken from snowpacktools to include my above reading functions
+# an adjusted read_pro function taken from snowpacktools to include my above reading functions
 def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface_hoar=True):
     """Reads a .PRO file and returns a dictionary with timestamps as keys and values being another dictionary with
     profile parameters as keys and data as value representing the evolving state of the snowpack.
@@ -97,34 +127,44 @@ def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface
         keep_soil (bool):       Decide if soil layers are kept
         consider_surface_hoar (bool):   Decide if surface hoar should be added as another layer
     Returns:
-        profs (dict):           Dictionary with timestamps as keys and values being another dictionary with profile parameters
+        profs (dict):           Dictionary with timestamps as keys and values being another dictionary with profile
+                                parameters
         meta_dict (dict):       Dictionary with metadata of snow profile
+        header (list):          List containing the elements of the header in the .pro file.
     """
 
     w, hours = pro_helper.set_resolution(res)
 
     PRO_CODE_DICT, VAR_CODES = pro_helper.get_pro_code_dict()
-    VAR_CODES_PROF = []
+    VAR_CODES_PROF = {}
 
     # print(PRO_CODE_DICT)
     # print(VAR_CODES)
-
-    """Dictionary with timestamps as keys and values being another dictionary with profile parameters as keys and data as value"""
-    profs = {}
-    meta_dict = {}
 
     """Open the PRO file and generate dict of variables with list of lines for each variable"""
     ########################################
     # --> HERE THE BIG ADJUSTMENT HAPPENS! #
     ########################################
     file_content, last_line = load_lines_whead(path, start=start, end=end)
+    # --> note that this makes sure that the last line will correspond to the end of a day! That means your end line
+    #     will not correspond perfectly to the actually used last line!!
     ########################################
     ########################################
     ########################################
+
+    """Dictionary with timestamps as keys and values being another dictionary with profile parameters as keys and data as value"""
+    profs = {}
+    meta_dict = {}
+    header = []
+
+    """ OLD --- CHANGED --- OLD --- CHANGED --- OLD
+    Open the PRO file and generate dict of variables with list of lines for each variable
+    with open(path, "r") as f:
+        file_content = f.readlines()
+    """
 
     section = '[STATION_PARAMETERS]'
     for line in file_content:
-
         line = line.rstrip('\n')
 
         if section=='[DATA]':
@@ -139,7 +179,8 @@ def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface
                 """Check if timestamp is of interest"""
                 if int(line[-8:-6]) in hours:
                     timestamp_of_interest = True
-                    ts = datetime.strptime( line.strip().split(',')[1], '%d.%m.%Y %H:%M:%S' )
+                    ts = _parse_date_like(line.strip().split(',')[1])
+                    # ts = datetime.strptime( line.strip().split(',')[1], '%d.%m.%Y %H:%M:%S' )
                     profs[ts] = {}
                     not_first_timestamp = True
                 else:
@@ -153,37 +194,40 @@ def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface
                     if len(height) == 1 and height.item() == 0: profs[ts][PRO_CODE_DICT[line[:4]]] = np.array([])
                     else: profs[ts][PRO_CODE_DICT[line[:4]]] = height
                 elif line[:4] == "0505":
-                    #-- KUE CHANGE START
-                    # --> var code 0505 seems to be in units "days" which is appears to be a float
-                    # profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype='datetime64[s]')
-                    profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype=float)
-                    #-- KUE CHANGE STOP
+                    try:
+                        profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype='datetime64[D]')
+                        # profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype='datetime64[s]')
+                    except:
+                        profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype=float)
+                elif line[:4] == "0530":
+                    pass
                 else:
-                    profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype=float)
+                    try:
+                        profs[ts][PRO_CODE_DICT[line[:4]]] = np.array(line.strip().split(',')[2:],dtype=float)
+                    except:
+                        # print(f"Waring, Key {line[:4]} not available for Prof: {path}")
+                        pass
 
         elif section=='[HEADER]':
             if line == '[DATA]':
-                """Drop variables that are not present in header of .PRO file"""
-                keys_to_drop = []
-                for varcode in VAR_CODES:
-                    # print(f"Loading variable {varcode}...")
-                    if varcode not in VAR_CODES_PROF:
-                        print('[i]  Variable ', varcode, ' is not found in the header of this .PRO file. It is dropped.')
-                        keys_to_drop.append(varcode)
-                for key in keys_to_drop:
-                    #-- KUE CHANGE START
-                    # VAR_CODES.pop(key)  # --> this does not seem to work; the .pop function needs an index and not
-                    #                           the element itself; however, the .remove function should work here
-                    VAR_CODES.remove(key)
-                    #-- KUE CHANGE STOP
+                # """Drop variables that are not present in header of .PRO file"""
+                # keys_to_drop = []
+                # for varcode in VAR_CODES:
+                #     if varcode not in VAR_CODES_PROF:
+                #         print('[i]  Variable ', varcode, ' is not found in the header of this .PRO file. It is dropped.')
+                #         keys_to_drop.append(varcode)
+
+                # for key in keys_to_drop:
+                #     VAR_CODES.pop(key)
 
                 section = '[DATA]'
                 timestamp_of_interest = False
                 not_first_timestamp   = False
                 continue
             else:
-                VAR_CODES_PROF.append(line[:4])
-
+                header.append(line)
+                VAR_CODES_PROF[line.split(",")[0]] = line.split(",")[-1]
+                VAR_CODES = VAR_CODES_PROF.keys()
         else: # - section=='[STATION_PARAMETERS]' - #
             if line == '[HEADER]':
                 section = '[HEADER]'
@@ -246,7 +290,10 @@ def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface
                             elif var == 'grain type (Swiss Code F1F2F3)':
                                 profs[ts][var] = np.append(profs[ts][var], surf_hoar[0])
                             elif var == "element deposition date (ISO)":
-                                profs[ts][var] = np.append(profs[ts][var], np.datetime64('NaT'))
+                                try:
+                                    profs[ts][var] = np.append(profs[ts][var], np.datetime64('NaT'))
+                                except:
+                                    profs[ts][var] = np.append(profs[ts][var], np.nan)
                             else:
                                 profs[ts][var] = np.append(profs[ts][var], np.nan)
 
@@ -277,7 +324,7 @@ def read_pro_lines(path, start, end, res='1h', keep_soil=False, consider_surface
         # df = df[::-1]
         # df = df.reset_index(drop=True)
 
-    return profs, meta_dict, last_line
+    return profs, meta_dict, header, last_line
 # end def
 
 
@@ -411,5 +458,54 @@ def tsa(prof):
 
     # return
     return {"tsa":tsa, "pwl_heights":pwl_heights}
+
+# end def
+
+
+# adjusted get_smet_df function from snowpacktools to load the forcing data
+def get_smet_df(path, forcing=False):
+    """Generates dataframe for further processing out of .smet file."""
+
+    var = pro_helper.get_var_smet(path)
+
+    skip = 0
+    with open(path, "r", encoding="utf-8") as f:
+        for skiprow, line in enumerate(f):
+            if line.strip() == "[DATA]":
+                break
+    df_smet = pd.read_csv(path, sep=" ", skiprows=skiprow+1, skipinitialspace=True, names =var)
+    df_smet = df_smet.replace(-999.0, np.nan)
+
+    if forcing:
+        variables_of_intrest = ["timestamp", "DW", "NET_SW", "PSUM", "RAIN", "RH", "SNOW", "TA", "TSG", "TSS", "VW"]
+        df_smet = df_smet.loc[:, df_smet.columns.intersection(variables_of_intrest)]
+
+        # convert the timestep to datetime format
+        df_smet["timestamp"] = pd.to_datetime(df_smet["timestamp"])
+        df_smet.set_index("timestamp", inplace=True)
+
+        return df_smet
+    else:
+        # Reduce dataframe to variables of interest
+        variables_of_intrest = ['timestamp', 'TSS_mod', 'TSS_meas', 'T_bottom', 'TSG', 'VW', 'DW', 'wind_trans24',
+                                'VW_drift', 'MS_Wind', 'HS_mod', 'HS_meas', 'MS_Snow','hoar_size', 'HN72_24',
+                                'HN24', 'MS_Rain', 'SWE', 'MS_Water']
+        df_smet = df_smet.loc[:, df_smet.columns.intersection(variables_of_intrest)]
+
+        # convert the timestep to datetime format
+        df_smet["timestamp"] = pd.to_datetime(df_smet["timestamp"])
+        df_smet.set_index("timestamp", inplace=True)
+
+        # KUE CHANGE START (added try except clause)
+        try:
+            df_smet['HS_mod']  = df_smet['HS_mod']/100
+            df_smet['HS_meas'] = df_smet['HS_meas']/100
+            df_smet['HN72_24'] = df_smet['HN72_24']/100
+            df_smet['HN24']    = df_smet['HN24']/100
+            return df_smet
+        except:
+            print("\nHN72 and HN24 parameters not available. If you want them, set OUT_HAZ = TRUE in the .ini file\n")
+            return df_smet
+        # end try except
 
 # end def

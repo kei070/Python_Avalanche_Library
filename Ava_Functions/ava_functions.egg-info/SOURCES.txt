@@ -11,6 +11,7 @@ ava_functions/Check_Intersect.py
 ava_functions/Concat_NORA3_Day.py
 ava_functions/ConfMat_Helper.py
 ava_functions/Convert_to_Categorcal.py
+ava_functions/Correlation_Helpers.py
 ava_functions/Count_DangerLevels.py
 ava_functions/Data_Loading.py
 ava_functions/DatetimeSimple.py
