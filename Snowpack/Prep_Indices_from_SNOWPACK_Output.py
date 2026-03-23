@@ -474,9 +474,7 @@ for t_i in np.arange(len(tstamps)):
 
 
 #%% add the index to a Pandas dataframe
-h23_df = pd.DataFrame({"lwc_i":lwc_i_l, "lwc_sum":lwc_s_l, "lwc_max":lwc_max_l, "lwc_s_top":lwc_s_top_l,
-                       "t_top":t_top_l},
-                      index=tstamps)
+h23_df = pd.DataFrame({"lwc_i":lwc_i_l, "lwc_max":lwc_max_l, "t_top":t_top_l}, index=tstamps)
 
 # again, fill the NaNs with the highest value (apparently 3)
 h23_df.fillna(value=0, inplace=True)
@@ -508,7 +506,7 @@ snowpack_df12 = snowpack_df[snowpack_df.index.hour == 12]
 snowpack_df15 = snowpack_df[snowpack_df.index.hour == 15]  # for the LWC params take 15:00 as in Hendrick et al. (2023)
 snowpack_df12.set_index(snowpack_df12.index.date, inplace=True)
 snowpack_df15.set_index(snowpack_df15.index.date, inplace=True)
-for lwc_p in ["lwc_i", "lwc_sum", "lwc_max", "lwc_s_top"]:
+for lwc_p in ["lwc_i", "lwc_max"]:
     snowpack_df12.loc[:, lwc_p] = snowpack_df15[lwc_p]  # replace the value at 12:00 with the value at 15:00
 # end for lwc_p
 

@@ -133,21 +133,16 @@ else:
 
         indfull_dict[k] = temp
 
-        if k in ["snow_depth", "snow_depth3", "snow_depth7",
-                 "snow_depth_d1", "snow_depth3_d1", "snow_depth7_d1",
-                 "snow_depth_d2", "snow_depth3_d2", "snow_depth7_d2",
-                 "snow_depth_d3", "snow_depth3_d3", "snow_depth7_d3"]:  # for snow depth take the maximum and minimum
+        # REVISION 2: exclude LWC_sum parameters
+        if k in ["lwc_sum", "lwc_s_top",
+                 "lwc_sum_d1", "lwc_s_top_d1",
+                 "lwc_sum_d2", "lwc_s_top_d2",
+                 "lwc_sum_d3", "lwc_s_top_d3"]:
+            continue
+        else:
             index_dict[k + "_emax"] = np.max(temp, axis=0)
             index_dict[k + "_emin"] = np.min(temp, axis=0)
-        elif k in ["lwc_i", "lwc_sum", "lwc_max", "lws_s_top", "t_top",
-                   "lwc_i_d1", "lwc_sum_d1", "lwc_max_d1", "lws_s_top_d1", "t_top_d1",
-                   "lwc_i_d2", "lwc_sum_d2", "lwc_max_d2", "lws_s_top_d2", "t_top_d2",
-                   "lwc_i_d3", "lwc_sum_d3", "lwc_max_d3", "lws_s_top_d3", "t_top_d3"]:
-            index_dict[k] = np.max(temp, axis=0)
-        else:  # take the index minimum
-            index_dict[k] = np.min(temp, axis=0)
         # end if else
-
     # end for k
 
 

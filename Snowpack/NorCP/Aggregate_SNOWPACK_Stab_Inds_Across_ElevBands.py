@@ -92,25 +92,6 @@ for subdir in subfolders:
 # end for subdir
 
 
-#%% get the indices
-"""
-indfull_dict = {}
-index_dict = {}
-for k in df.columns:
-    temp = np.array([dfk[k] for dfk in df_list])
-
-    indfull_dict[k] = temp
-
-    if k in ["snow_depth", "snow_depth3", "snow_depth7"]:  # for snow depth take the maximum and minimum
-        index_dict[k + "_emax"] = np.max(temp, axis=0)
-        index_dict[k + "_emin"] = np.min(temp, axis=0)
-    else:  # take the index minimum
-        index_dict[k] = np.min(temp, axis=0)
-    # end if else
-
-# end for k
-"""
-
 #%% depending on the mode (test or not) execute the following actions
 if test_mode:
     # check discrepancies between datasets that hinder concatenation
@@ -144,22 +125,18 @@ else:
 
         indfull_dict[k] = temp
 
-        if k in ["snow_depth", "snow_depth3", "snow_depth7",
-                 "snow_depth_d1", "snow_depth3_d1", "snow_depth7_d1",
-                 "snow_depth_d2", "snow_depth3_d2", "snow_depth7_d2",
-                 "snow_depth_d3", "snow_depth3_d3", "snow_depth7_d3"]:  # for snow depth take the maximum and minimum
-            index_dict[k + "_emax"] = np.nanmax(temp, axis=0)
-            index_dict[k + "_emin"] = np.nanmin(temp, axis=0)
-        elif k in ["lwc_i", "lwc_sum", "lwc_max", "lws_s_top", "t_top",
-                   "lwc_i_d1", "lwc_sum_d1", "lwc_max_d1", "lws_s_top_d1", "t_top_d1",
-                   "lwc_i_d2", "lwc_sum_d2", "lwc_max_d2", "lws_s_top_d2", "t_top_d2",
-                   "lwc_i_d3", "lwc_sum_d3", "lwc_max_d3", "lws_s_top_d3", "t_top_d3"]:
-            index_dict[k] = np.nanmax(temp, axis=0)
-        else:  # take the index minimum
-            index_dict[k] = np.nanmin(temp, axis=0)
+        # REVISION 2: exclude LWC_sum parameters
+        if k in ["lwc_sum", "lwc_s_top",
+                 "lwc_sum_d1", "lwc_s_top_d1",
+                 "lwc_sum_d2", "lwc_s_top_d2",
+                 "lwc_sum_d3", "lwc_s_top_d3"]:
+            continue
+        else:
+            index_dict[k + "_emax"] = np.max(temp, axis=0)
+            index_dict[k + "_emin"] = np.min(temp, axis=0)
         # end if else
-
     # end for k
+
     #% generate a dataframe from the indices
     out_df = pd.DataFrame(index_dict, index=df_list[0].index.date)
 
