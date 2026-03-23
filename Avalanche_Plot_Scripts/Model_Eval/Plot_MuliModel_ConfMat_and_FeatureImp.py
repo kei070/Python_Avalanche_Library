@@ -163,7 +163,7 @@ hm00 = sns.heatmap(win_conf_dat, annot=win_labels, fmt="", cmap="Blues", ax=ax00
 hm01 = sns.heatmap(pwl_conf_dat, annot=pwl_labels, fmt="", cmap="Blues", ax=ax01, vmin=vmin, vmax=vmax, cbar=False)
 hm10 = sns.heatmap(wet_conf_dat, annot=wet_labels, fmt="", cmap="Blues", ax=ax10, vmin=vmin, vmax=vmax, cbar=False)
 hm11 = sns.heatmap(adl_conf_dat, annot=adl_labels, fmt="", cmap="Blues", ax=ax11, vmin=vmin, vmax=vmax, cbar=True,
-                   cbar_ax=ax_cbar, cbar_kws={"label":"Fraction of instances"})
+                   cbar_ax=ax_cbar, cbar_kws={"label":"Row-wise fraction of days"})
 
 ax00.set_xlabel("Predicted")
 ax00.set_ylabel("True")

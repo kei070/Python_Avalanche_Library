@@ -150,6 +150,46 @@ pl.show()
 pl.close()
 
 
+#%% plot  --  revised version for review 2 ---> bar plot because without lines it does not look good
+aps_pl = ["Glide\nslab", "New\nloose", "New\nslab", "Wet\nslab", "Wet\nloose", "Wet", "PWL\nslab", "Wind\nslab",
+          "ADL"]
+
+fig = pl.figure(figsize=(4.4, 3))
+ax0 = fig.add_subplot(111)
+ax1 = ax0.twinx()  # fig.add_subplot(212)
+
+p00 = ax0.bar(np.arange(len(ord_avg_dl))-0.2, ord_avg_dl, width=0.4, color="red",
+              label="Average DL")
+p01 = ax1.bar(np.arange(len(ord_ap_freq))+0.2, ord_ap_freq, width=0.4, color="black",
+              linewidth=0.25, label="# of days")
+
+ax1.axhline(y=0, c="black", linewidth=0.5)
+
+ax1.legend(handles=[p00, p01], loc="upper left", ncol=2)
+
+ax0.set_ylabel("Average danger level", color="red")
+ax1.set_ylabel("Number of days")
+
+
+# ax0.set_xticklabels([])
+ax1.set_xticks(np.arange(len(ap_freq["total"].keys())))
+ax1.set_xticklabels(aps_pl)
+
+ax0.spines['left'].set_color('red')
+ax1.spines['left'].set_color('red')
+ax0.tick_params(axis='y', colors='red')
+
+ax0.set_title("Avalanche danger level statistics")
+
+ax0.set_ylim(0, 3.33)
+
+fig.subplots_adjust(hspace=0.1)
+
+pl.savefig(pl_path + "ADL_AP_Statisitics.pdf", dpi=200, bbox_inches="tight")
+
+pl.show()
+pl.close()
+
 
 
 

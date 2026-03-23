@@ -255,3 +255,64 @@ feats_emax = {k + "_emax":feats_m[k] + "_emax" for k in feats_m.keys()}
 
 feats_all = {**feats_m, **feats_emin, **feats_emax}
 
+
+#%% set feature dictonary -- review round 2 lwc_sum removed
+feats_m = {'t_mean':"t1", 't_max':"tmax", 't_min':"tmin", 't_range':"dtr",
+               'ftc':"ftc",
+               't3':"t3", 't7':"t7",
+               'tmax3':'tmax3', 'tmax7':'tmax7',
+               'dtemp1':'dtr1', 'dtemp2':'dtr2', 'dtemp3':'dtr3',
+               'dtempd1':'dtrd1', 'dtempd2':'dtrd2', 'dtempd3':'dtrd3',
+               'pdd':"pdd",
+               'ws_mean':"w1", 'ws_max':"wmax", 'ws_min':"wmin", "ws_range":"dws",
+               "dws1":"dws1", "dws2":"dws2", "dws3":"dws3",
+               "dwsd1":"dwsd1", "dwsd2":"dwsd2", "dwsd3":"dwsd3",
+               'wind_direction':"w_dir", "dwdir":"dwdir",
+               "dwdir1":"dwdir1", "dwdir2":"dwdir2", "dwdir3":"dwdir3",
+               'w3':"w3",
+               'wmax3':'wmax3', 'wmax7':'wmax7',
+               'total_prec_sum':"Ptot",
+               's1':'s1', 'r1':'r1',
+               'r3':'r3', 'r7':'r7',
+               's3':'s3', 's7':'s7',
+               'wdrift':'wdrift', 'wdrift_3':'wdrift_3',
+               'wdrift3':'wdrift3', 'wdrift3_3':'wdrift3_3',
+               'RH':"rh",
+               'NLW':"nlw", 'NSW':"nsw",
+               'RH3':"rh3", 'RH7':"rh7",
+               'NLW3':"nlw3", 'NLW7':"nlw7",
+               'NSW3':"nsw3", 'NSW7':"nsw7",
+               "ava_clim":"aci"}
+
+
+feats_sp = ["Sk38_100", "Sk38_2", "Sk38_100_d1", "Sk38_2_d1", "Sk38_100_d2", "Sk38_2_d2", "Sk38_100_d3", "Sk38_2_d3",
+            "Sn38_100", "Sn38_2", "Sn38_100_d1", "Sn38_2_d1", "Sn38_100_d2", "Sn38_2_d2", "Sn38_100_d3", "Sn38_2_d3",
+            "RTA_100", "RTA_2", "RTA_100_d1", "RTA_2_d1", "RTA_100_d2", "RTA_2_d2", "RTA_100_d3", "RTA_2_d3",
+# --> fix RTA below and convert to SSI
+#            "SSI_100", "SSI_2", "SSI_100_d1", "SSI_2_d1", "SSI_100_d2", "SSI_2_d2", "SSI_100_d3", "SSI_2_d3",
+            "lwc_i", "lwc_max", "lwc_i_d1", "lwc_max_d1", "lwc_i_d2", "lwc_max_d2", "lwc_i_d3", "lwc_max_d3",
+            "t_top", "t_top_d1", "t_top_d2", "t_top_d3",
+             ]
+
+
+feats_sp_emin = {k + "_emin":k + "_n" for k in feats_sp}
+feats_sp_emax = {k + "_emax":k + "_x" for k in feats_sp}
+
+# add snow depth as SD
+feats_sd = {"snow_depth_emin":"SD1_n", "snow_depth3_emin":"SD3_n", "snow_depth7_emin":"SD7_n",
+            "snow_depth_emax":"SD1_x", "snow_depth3_emax":"SD3_x", "snow_depth7_emax":"SD7_x",
+            "snow_depth_d1_emin":"SD1_d1_n", "snow_depth_d2_emin":"SD1_d2_n", "snow_depth_d3_emin":"SD1_d3_n",
+            "snow_depth_d1_emax":"SD1_d1_x", "snow_depth_d2_emax":"SD1_d2_x", "snow_depth_d3_emax":"SD1_d3_x"}
+feats_ssi = {"RTA_100_emin":"SSI_100_n", "RTA_2_emin":"SSI_2_n", "RTA_100_emax":"SSI_100_x", "RTA_2_emax":"SSI_2_x",
+             "RTA_100_d1_emin":"SSI_100_d1_n", "RTA_2_d1_emin":"SSI_2_d1_n",
+             "RTA_100_d1_emax":"SSI_100_d1_x", "RTA_2_d1_emax":"SSI_2_d1_x",
+             "RTA_100_d2_emin":"SSI_100_d2_n", "RTA_2_d2_emin":"SSI_2_d2_n",
+             "RTA_100_d2_emax":"SSI_100_d2_x", "RTA_2_d2_emax":"SSI_2_d2_x",
+             "RTA_100_d3_emin":"SSI_100_d3_n", "RTA_2_d3_emin":"SSI_2_d3_n",
+             "RTA_100_d3_emax":"SSI_100_d3_x", "RTA_2_d3_emax":"SSI_2_d3_x"}
+
+feats_emin = {k + "_emin":feats_m[k] + "_n" for k in feats_m.keys()}
+feats_emax = {k + "_emax":feats_m[k] + "_x" for k in feats_m.keys()}
+
+feats_all = {**feats_emin, **feats_emax, **feats_sp_emin, **feats_sp_emax, **feats_sd, **feats_ssi}  # , **feats_wt}
+
