@@ -1,5 +1,7 @@
 # Past and future changes in avalanche danger in northern Norway
-This repository contains the code used to preprocess the data and train the machine-learning models for the article Eiselt & Graversen: "Past and future changes in avalanche problems in northern Norway estimated with machine-learning models" submitted to The Cryosphere and available as a preprint at EGUSphere here http://doi.org/10.5194/egusphere-2025-4685.
+This repository contains the code used to preprocess the data and train the machine-learning models for the article Eiselt & Graversen: "Past and
+future changes in avalanche problems in northern Norway estimated with machine-learning models" accepted for publication at The Cryosphere (the
+preprint version is available at EGUSphere here http://doi.org/10.5194/egusphere-2025-4685).
 
 This repository includes the Python package `ava_functions` in the subdirectory `Ava_Functions`. In that subdirectory execute <br>
 `pip install .` <br>
@@ -16,7 +18,7 @@ The procedure to optimise and train the random forest models is presented in the
 
 The procedure to hindcast and future-project the avalanche-day frequency as well as the generation of the corresponding (and some other) plots are dexcribed in `Doc_Predict_and_Plot.pdf`. 
 
-The models and the data used to train them are published on Zenodo (https://doi.org/10.5281/zenodo.17106819). For the data not available in the Zenodo repository, consult the documentation pdfs and see above.
+The models and the data used to train them are published on Zenodo (https://doi.org/10.5281/zenodo.19185230). For the data not available in the Zenodo repository, consult the documentation pdfs and see above.
 
 Note that the scripts do not generally create the output directories themselves. This must either be implemented in the scripts or the output directories must already exist.
 
